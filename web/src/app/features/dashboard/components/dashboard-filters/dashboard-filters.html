@@ -1,0 +1,91 @@
+<div class="dashboard-filters">
+  <mat-form-field appearance="outline" class="dashboard-filters__field">
+    <mat-label>Período</mat-label>
+    <mat-select
+      [ngModel]="filters.periodPreset"
+      (ngModelChange)="onPeriodPresetChange($event)"
+    >
+      @for (preset of periodPresets; track preset.value) {
+        <mat-option [value]="preset.value">{{ preset.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (filters.periodPreset === 'custom') {
+    <mat-form-field appearance="outline" class="dashboard-filters__field dashboard-filters__field--date">
+      <mat-label>De</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="filters.startDate"
+        (ngModelChange)="onCustomStartChange($event)"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="dashboard-filters__field dashboard-filters__field--date">
+      <mat-label>Até</mat-label>
+      <input
+        matInput
+        type="date"
+        [ngModel]="filters.endDate"
+        (ngModelChange)="onCustomEndChange($event)"
+      />
+    </mat-form-field>
+  }
+
+  <mat-form-field appearance="outline" class="dashboard-filters__field">
+    <mat-label>Robô</mat-label>
+    <mat-select
+      multiple
+      [ngModel]="filters.robotIds"
+      (ngModelChange)="onRobotsChange($event)"
+    >
+      @for (robot of filterOptions?.robots ?? []; track robot.id) {
+        <mat-option [value]="robot.id">{{ robot.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="dashboard-filters__field">
+    <mat-label>Cliente</mat-label>
+    <mat-select
+      multiple
+      [ngModel]="filters.clientIds"
+      (ngModelChange)="onClientsChange($event)"
+    >
+      @for (client of filterOptions?.clients ?? []; track client.id) {
+        <mat-option [value]="client.id">{{ client.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="dashboard-filters__field">
+    <mat-label>Usuário</mat-label>
+    <mat-select
+      multiple
+      [ngModel]="filters.userIds"
+      (ngModelChange)="onUsersChange($event)"
+    >
+      @for (user of filterOptions?.users ?? []; track user.id) {
+        <mat-option [value]="user.id">{{ user.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="dashboard-filters__field">
+    <mat-label>Status</mat-label>
+    <mat-select
+      multiple
+      [ngModel]="filters.statuses"
+      (ngModelChange)="onStatusesChange($event)"
+    >
+      @for (status of statusOptions; track status.value) {
+        <mat-option [value]="status.value">{{ status.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-stroked-button type="button" class="dashboard-filters__clear" (click)="clearFilters()">
+    Limpar filtros
+  </button>
+</div>

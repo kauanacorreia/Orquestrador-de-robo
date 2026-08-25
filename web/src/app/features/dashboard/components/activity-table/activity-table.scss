@@ -1,0 +1,42 @@
+.activity-table {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  &__table {
+    width: 100%;
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  &__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+
+  &__status--success {
+    color: #2e7d32;
+  }
+
+  &__status--started {
+    color: #1976d2;
+  }
+
+  &__status--failure {
+    color: #c62828;
+  }
+
+  &__empty {
+    padding: 16px;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+  }
+}

@@ -1,0 +1,54 @@
+.kpi-card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: none;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+
+    &--muted {
+      font-size: 1rem;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    &--emphasis {
+      font-size: 2rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: 2px;
+  }
+
+  &--success &__value {
+    color: #2e7d32;
+  }
+
+  &--danger &__value {
+    color: #c62828;
+  }
+
+  &--attention {
+    border-color: rgba(198, 40, 40, 0.35);
+  }
+
+  &--attention.kpi-card--success {
+    border-color: rgba(46, 125, 50, 0.35);
+  }
+}

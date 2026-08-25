@@ -1,0 +1,23 @@
+<mat-card
+  class="kpi-card"
+  [class]="'kpi-card--' + variant()"
+  [class.kpi-card--attention]="attention()"
+>
+  <mat-card-content class="kpi-card__content">
+    <span class="kpi-card__label">{{ label() }}</span>
+
+    @if (secondaryValue() === null || secondaryValue() === undefined) {
+      <span class="kpi-card__value">{{ value() }}</span>
+    } @else if (emphasis() === 'secondaryValue') {
+      <span class="kpi-card__value kpi-card__value--emphasis">{{ secondaryValue() }}</span>
+      <span class="kpi-card__value kpi-card__value--muted">{{ value() }}</span>
+    } @else {
+      <span class="kpi-card__value">{{ value() }}</span>
+      <span class="kpi-card__value kpi-card__value--muted">{{ secondaryValue() }}</span>
+    }
+
+    @if (subtitle()) {
+      <span class="kpi-card__subtitle">{{ subtitle() }}</span>
+    }
+  </mat-card-content>
+</mat-card>
