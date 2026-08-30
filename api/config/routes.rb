@@ -16,5 +16,15 @@ Rails.application.routes.draw do
     get "dashboard/summary", to: "dashboard#summary"
     get "dashboard/volumetria", to: "dashboard#volumetria"
     get "dashboard/filter_options", to: "dashboard#filter_options"
+
+    namespace :v1 do
+      resources :companies, only: [:index] do
+        get "robots/:robot_id",
+            to: "company_robot_configs#show"
+
+        put "robots/:robot_id",
+            to: "company_robot_configs#update"
+      end
+    end
   end
 end
