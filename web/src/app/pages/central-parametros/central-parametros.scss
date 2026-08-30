@@ -1,0 +1,129 @@
+.page {
+  padding: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+  }
+}
+
+.selection-card,
+.config-card,
+.empty-state {
+  border-radius: 14px;
+}
+
+.selection-card {
+  margin-bottom: 24px;
+}
+
+.selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.dynamic-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding-top: 24px;
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  mat-checkbox {
+    margin: 12px 0;
+  }
+}
+
+.config-card {
+  padding: 8px;
+}
+
+.loading {
+  min-height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 14px 18px;
+  margin-bottom: 20px;
+
+  border-radius: 8px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.empty-state {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+
+  mat-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 54px;
+    margin-bottom: 14px;
+    color: #9ca3af;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+  }
+
+  p {
+    margin: 0;
+    max-width: 480px;
+    color: #6b7280;
+  }
+}
+
+.no-fields {
+  color: #6b7280;
+  padding: 24px 0;
+}
+
+mat-card-actions {
+  padding: 8px 16px 16px;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 20px;
+  }
+
+  .selectors,
+  .dynamic-form {
+    grid-template-columns: 1fr;
+  }
+}

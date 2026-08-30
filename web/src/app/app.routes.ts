@@ -21,12 +21,19 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        loadComponent: () => import('./pages/home/home').then((module) => module.Home),
+        loadComponent: () =>
+          import('./pages/home/home').then((module) => module.Home),
         providers: [provideCharts(withDefaultRegisterables())]
       },
       {
         path: 'robots',
         component: RobotsList
+      },
+      {
+        path: 'parametros',
+        loadComponent: () =>
+          import('./pages/central-parametros/central-parametros')
+            .then((module) => module.CentralParametros)
       }
     ]
   }
