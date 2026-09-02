@@ -1,0 +1,9 @@
+.volumetria-chart {
+  position: relative;
+  height: 320px;
+
+  &__canvas {
+    width: 100%;
+    height: 100%;
+  }
+}

@@ -1,24 +1,76 @@
-<div class="home">
-  <mat-card class="status-card">
-    <mat-card-header>
-      <mat-card-title>Status da API</mat-card-title>
-      <mat-card-subtitle>Orquestrador de Robôs RPA</mat-card-subtitle>
-    </mat-card-header>
+<div class="dashboard-home">
+  <header class="dashboard-home__header">
+    <h1>Dashboard do Orquestrador</h1>
+  </header>
 
-    <mat-card-content>
-      @if (loading()) {
-        <div class="status-row">
-          <mat-spinner diameter="24"></mat-spinner>
-          <span>Verificando conexão com a API...</span>
-        </div>
-      } @else {
-        <div class="status-row">
-          <mat-icon [class.status-ok]="status()?.connected" [class.status-fail]="!status()?.connected">
-            {{ status()?.connected ? 'check_circle' : 'error' }}
-          </mat-icon>
-          <span>{{ status()?.message }}</span>
-        </div>
-      }
-    </mat-card-content>
-  </mat-card>
+  <app-dashboard-filters
+    class="dashboard-home__filters"
+    [filters]="filters()"
+    [filterOptions]="filterOptions()"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-dashboard-filters>
+
+  @if (summary(); as summary) {
+    <div class="dashboard-home__kpis">
+      <app-kpi-card label="Total de execuções" [value]="summary.totalExecutions"></app-kpi-card>
+
+      <app-kpi-card
+        label="Sucesso"
+        [value]="summary.successCount"
+        [secondaryValue]="(summary.successRate * 100).toFixed(1) + '%'"
+        [subtitle]="periodLabel(filters())"
+        variant="success"
+      ></app-kpi-card>
+
+      <app-kpi-card
+        label="Falha"
+        [value]="summary.failureCount"
+        [secondaryValue]="(summary.failureRate * 100).toFixed(1) + '%'"
+        [subtitle]="periodLabel(filters())"
+        emphasis="secondaryValue"
+        variant="danger"
+        [attention]="true"
+      ></app-kpi-card>
+
+      <app-kpi-card
+        label="Falhas (últimas 24h)"
+        [value]="summary.failuresLast24h"
+        [secondaryValue]="(summary.failuresLast24hRate * 100).toFixed(1) + '%'"
+        subtitle="Últimas 24 horas"
+        emphasis="secondaryValue"
+        variant="danger"
+        [attention]="true"
+      ></app-kpi-card>
+
+      <app-kpi-card label="Robôs ativos" [value]="summary.activeRobots"></app-kpi-card>
+      <app-kpi-card label="Usuários" [value]="summary.activeUsers"></app-kpi-card>
+      <app-kpi-card label="Clientes" [value]="summary.clients"></app-kpi-card>
+    </div>
+  } @else if (loading()) {
+    <p class="dashboard-home__loading">Carregando dashboard...</p>
+  } @else if (error(); as error) {
+    <p class="dashboard-home__error">{{ error }}</p>
+  }
+
+  <section class="dashboard-home__charts">
+    <div class="dashboard-home__chart dashboard-home__chart--full">
+      <h2>Volumetria por dia</h2>
+      <app-volumetria-chart [data]="volumetria()"></app-volumetria-chart>
+    </div>
+
+    <div class="dashboard-home__chart">
+      <h2>Taxa de sucesso (%)</h2>
+      <app-rate-chart label="Taxa de sucesso" color="#2e7d32" [data]="successRateSeries()"></app-rate-chart>
+    </div>
+
+    <div class="dashboard-home__chart">
+      <h2>Taxa de erro (%)</h2>
+      <app-rate-chart label="Taxa de erro" color="#c62828" [data]="failureRateSeries()"></app-rate-chart>
+    </div>
+  </section>
+
+  <section class="dashboard-home__activity">
+    <h2>Atividades em tempo real</h2>
+    <app-activity-table [logs]="logs()"></app-activity-table>
+  </section>
 </div>

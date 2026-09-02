@@ -1,0 +1,117 @@
+<div class="robots-page">
+
+  <header class="page-header">
+    <div class="header-text">
+      <h1>Robôs</h1>
+      <p>Definição de schemas e parâmetros de automação</p>
+    </div>
+
+    <button mat-flat-button color="primary" class="new-robot-button" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      Registrar Novo Robô
+    </button>
+  </header>
+
+  @if (!loading() && !errorMessage() && robots().length > 0) {
+    <div class="toolbar">
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          placeholder="Buscar por nome ou descrição"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <strong>{{ robots().length }}</strong>
+          <span>robôs cadastrados</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <strong>{{ activeCount() }}</strong>
+          <span>ativos</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Carregando robôs...</span>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage() }}</p>
+      <button mat-stroked-button (click)="loadRobots()">Tentar novamente</button>
+    </div>
+  } @else if (robots().length === 0) {
+    <div class="empty-state">
+      <mat-icon>smart_toy</mat-icon>
+      <h3>Nenhum robô cadastrado</h3>
+      <p>Registre o primeiro robô para começar a definir os parâmetros de automação.</p>
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Registrar Novo Robô
+      </button>
+    </div>
+  } @else if (filteredRobots().length === 0) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <h3>Nenhum resultado para "{{ searchTerm() }}"</h3>
+      <p>Tente buscar por outro nome ou termo da descrição.</p>
+    </div>
+  } @else {
+    <div class="robots-grid">
+      @for (robot of filteredRobots(); track robot.id) {
+        <mat-card class="robot-card" [style.--category-color]="categoryColor(robot)">
+
+          <div class="card-accent"></div>
+
+          <div class="card-body">
+            <div class="card-top">
+              <div class="robot-icon">
+                <mat-icon>smart_toy</mat-icon>
+              </div>
+              <span class="category-tag">{{ category(robot) }}</span>
+            </div>
+
+            <h3>{{ robot.name }}</h3>
+            <p class="robot-description">{{ robot.description }}</p>
+
+            <div class="robot-meta">
+              <span class="meta-item">
+                <mat-icon>list_alt</mat-icon>
+                {{ fieldCount(robot) }} parâmetros
+              </span>
+              <span class="meta-item">
+                <mat-icon>history</mat-icon>
+                v{{ robot.current_version }}
+              </span>
+              <span class="status-dot" [class.active]="robot.status === 'ACTIVE'">
+                {{ robot.status === 'ACTIVE' ? 'Ativo' : robot.status }}
+              </span>
+            </div>
+
+            <div class="card-actions">
+              <button mat-stroked-button (click)="openView(robot)">
+                <mat-icon>edit</mat-icon>
+                Ver / Editar
+              </button>
+              <button mat-flat-button color="primary" (click)="openNewVersion(robot)">
+                <mat-icon>upgrade</mat-icon>
+                Nova Versão
+              </button>
+            </div>
+          </div>
+
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>

@@ -1,24 +1,69 @@
-.home {
+.dashboard-home {
   display: flex;
-  justify-content: center;
-  padding: 32px 16px;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__filters {
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  &__loading,
+  &__error {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__error {
+    color: #c62828;
+  }
+
+  &__charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  &__chart {
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__activity {
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+  }
 }
 
-.status-card {
-  max-width: 480px;
-  width: 100%;
-}
-
-.status-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.status-ok {
-  color: #2e7d32;
-}
-
-.status-fail {
-  color: #c62828;
+@media (max-width: 900px) {
+  .dashboard-home__charts {
+    grid-template-columns: 1fr;
+  }
 }

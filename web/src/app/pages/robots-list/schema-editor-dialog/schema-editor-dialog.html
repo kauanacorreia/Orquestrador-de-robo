@@ -1,0 +1,107 @@
+<h2 mat-dialog-title>
+  @if (data.mode === 'create') { Registrar Novo Robô }
+  @else if (data.mode === 'new-version') { Nova Versão — {{ data.robot?.name }} }
+  @else { {{ data.robot?.name }} }
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="schema-form">
+
+    @if (data.mode !== 'new-version') {
+      <div class="basic-info">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome do robô</mat-label>
+          <input matInput formControlName="name" [readonly]="readOnly" placeholder="Ex: Robô Fiscal - Emitir NF" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput formControlName="description" [readonly]="readOnly" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="section-divider"></div>
+    }
+
+    <div class="fields-header">
+      <div>
+        <h3>Parâmetros</h3>
+        <span class="fields-count">{{ fields.length }} campo(s) configurado(s)</span>
+      </div>
+      @if (!readOnly) {
+        <button mat-stroked-button type="button" (click)="addField()">
+          <mat-icon>add</mat-icon>
+          Adicionar Campo
+        </button>
+      }
+    </div>
+
+    <div formArrayName="fields" class="fields-list">
+      @for (fieldGroup of fields.controls; track $index) {
+        <div [formGroupName]="$index" class="field-row" [class.is-default]="isDefaultField($index)">
+
+          <div class="field-row-top">
+            <mat-form-field appearance="outline" class="field-name">
+              <mat-label>Nome do campo</mat-label>
+              <input matInput formControlName="name" [readonly]="readOnly" placeholder="ex: url_sistema" class="mono-input" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-label">
+              <mat-label>Rótulo</mat-label>
+              <input matInput formControlName="label" [readonly]="readOnly" placeholder="ex: URL do sistema" />
+            </mat-form-field>
+
+            @if (isDefaultField($index)) {
+              <span class="default-badge" matTooltip="Campo padrão da empresa">Padrão</span>
+            }
+          </div>
+
+          <div class="field-row-bottom">
+            <mat-form-field appearance="outline" class="field-type">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="type" [disabled]="readOnly">
+                @for (t of fieldTypes; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="required" [disabled]="readOnly" class="field-required">
+              Obrigatório
+            </mat-checkbox>
+
+            <span class="spacer"></span>
+
+            @if (!readOnly) {
+              <button mat-icon-button type="button" (click)="removeField($index)" class="remove-button" matTooltip="Remover campo">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (fields.length === 0) {
+        <p class="empty-fields">Nenhum campo adicionado ainda.</p>
+      }
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-message">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancel()">
+    {{ readOnly ? 'Fechar' : 'Cancelar' }}
+  </button>
+  @if (!readOnly) {
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="saving">
+      {{ saving ? 'Salvando...' : 'Salvar' }}
+    </button>
+  }
+</mat-dialog-actions>

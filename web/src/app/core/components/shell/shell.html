@@ -1,0 +1,31 @@
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <span>Orquestrador RPA</span>
+    </div>
+
+    <nav>
+      <a routerLink="/home" routerLinkActive="active">
+        <mat-icon>dashboard</mat-icon>
+        Dashboard
+      </a>
+      <a routerLink="/robots" routerLinkActive="active">
+        <mat-icon>smart_toy</mat-icon>
+        Robôs
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>Wölfer</span>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>
