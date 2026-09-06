@@ -41,6 +41,7 @@
     </div>
 
     <nav>
+
       <a
         routerLink="/home"
         routerLinkActive="active"
@@ -91,6 +92,25 @@
           Empresas
         </span>
       </a>
+
+      <a
+        routerLink="/acessos"
+        routerLinkActive="active"
+        class="access-control-link"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Controle de Acessos'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>manage_accounts</mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Controle de Acessos
+        </span>
+      </a>
+
     </nav>
 
     <div class="sidebar-footer">

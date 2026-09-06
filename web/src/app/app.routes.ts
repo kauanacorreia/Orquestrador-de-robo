@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import {
+  provideCharts,
+  withDefaultRegisterables
+} from 'ng2-charts';
 
 import { Login } from './pages/login/login';
 import { RobotsList } from './pages/robots-list/robots-list';
@@ -11,10 +14,12 @@ export const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   },
+
   {
     path: 'login',
     component: Login
   },
+
   {
     path: '',
     component: Shell,
@@ -22,18 +27,44 @@ export const routes: Routes = [
       {
         path: 'home',
         loadComponent: () =>
-          import('./pages/home/home').then((module) => module.Home),
-        providers: [provideCharts(withDefaultRegisterables())]
+          import('./pages/home/home')
+            .then(
+              module =>
+                module.Home
+            ),
+
+        providers: [
+          provideCharts(
+            withDefaultRegisterables()
+          )
+        ]
       },
+
       {
         path: 'robots',
         component: RobotsList
       },
+
       {
         path: 'parametros',
         loadComponent: () =>
-          import('./pages/central-parametros/central-parametros')
-            .then((module) => module.CentralParametros)
+          import(
+            './pages/central-parametros/central-parametros'
+          ).then(
+            module =>
+              module.CentralParametros
+          )
+      },
+
+      {
+        path: 'acessos',
+        loadComponent: () =>
+          import(
+            './pages/access-control/access-control'
+          ).then(
+            module =>
+              module.AccessControl
+          )
       }
     ]
   }

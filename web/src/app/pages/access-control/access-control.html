@@ -1,0 +1,1002 @@
+<section class="page">
+
+  <header class="page-header">
+    <div>
+      <h1>
+        Controle de Acessos
+      </h1>
+
+      <p>
+        Gerencie usuários e permissões
+        de acesso ao sistema.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openCreate()"
+    >
+      <mat-icon>
+        person_add
+      </mat-icon>
+
+      Criar Usuário
+    </button>
+  </header>
+
+
+  <mat-card class="users-card">
+
+    <div class="toolbar">
+
+      <mat-form-field
+        appearance="outline"
+        class="search-field"
+      >
+        <mat-label>
+          Buscar usuário
+        </mat-label>
+
+        <mat-icon matPrefix>
+          search
+        </mat-icon>
+
+        <input
+          matInput
+          placeholder="Nome, e-mail, acesso ou status"
+          [value]="searchTerm()"
+          (input)="
+            setSearch(
+              $any($event.target).value
+            )
+          "
+        />
+      </mat-form-field>
+
+    </div>
+
+
+    <div
+      class="loading"
+      *ngIf="loading()"
+    >
+      <mat-spinner
+        diameter="42"
+      ></mat-spinner>
+    </div>
+
+
+    <div
+      class="error-state"
+      *ngIf="
+        !loading() &&
+        errorMessage()
+      "
+    >
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <h2>
+        Não foi possível carregar
+        os usuários
+      </h2>
+
+      <p>
+        {{ errorMessage() }}
+      </p>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="loadUsers()"
+      >
+        Tentar novamente
+      </button>
+    </div>
+
+
+    <ng-container
+      *ngIf="
+        !loading() &&
+        !errorMessage()
+      "
+    >
+
+      <div
+        class="table-wrapper"
+        *ngIf="
+          filteredUsers().length > 0
+        "
+      >
+
+        <table class="users-table">
+
+          <thead>
+            <tr>
+              <th>Nome</th>
+
+              <th>E-mail</th>
+
+              <th>
+                Nível de Acesso
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Último Login
+              </th>
+
+              <th
+                class="actions-column"
+              >
+                Ações
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let user
+                of filteredUsers()
+              "
+              [class.inactive-row]="
+                user.status ===
+                'INACTIVE'
+              "
+            >
+
+              <td>
+                <div
+                  class="user-info"
+                >
+
+                  <div
+                    class="user-avatar"
+                  >
+                    {{
+                      user.name
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
+                  </div>
+
+                  <div
+                    class="user-name-wrapper"
+                  >
+                    <span
+                      class="user-name"
+                    >
+                      {{ user.name }}
+                    </span>
+
+                    <span
+                      class="current-user-label"
+                      *ngIf="
+                        isCurrentUser(user)
+                      "
+                    >
+                      Você
+                    </span>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td
+                class="email-column"
+              >
+                {{ user.email }}
+              </td>
+
+
+              <td>
+                <span
+                  class="role-badge"
+                  [class.admin]="
+                    user.role ===
+                    'ADMIN'
+                  "
+                  [class.operator]="
+                    user.role ===
+                    'OPERATOR'
+                  "
+                >
+                  <mat-icon>
+                    {{
+                      user.role ===
+                      'ADMIN'
+                        ? 'verified_user'
+                        : 'person'
+                    }}
+                  </mat-icon>
+
+                  {{
+                    roleLabel(
+                      user.role
+                    )
+                  }}
+                </span>
+              </td>
+
+
+              <td>
+                <span
+                  class="status-badge"
+                  [class.active]="
+                    user.status ===
+                    'ACTIVE'
+                  "
+                  [class.inactive]="
+                    user.status ===
+                    'INACTIVE'
+                  "
+                >
+                  <span
+                    class="status-dot"
+                  ></span>
+
+                  {{
+                    statusLabel(
+                      user.status
+                    )
+                  }}
+                </span>
+              </td>
+
+
+              <td
+                class="last-login"
+              >
+                {{
+                  formatLastLogin(
+                    user.last_login_at
+                  )
+                }}
+              </td>
+
+
+              <td
+                class="actions-column"
+              >
+
+                <div
+                  class="action-buttons"
+                >
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="edit-permissions-button"
+                    (click)="
+                      openPermissions(
+                        user
+                      )
+                    "
+                  >
+                    <mat-icon>
+                      manage_accounts
+                    </mat-icon>
+
+                    Editar Permissões
+                  </button>
+
+
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [disabled]="
+                      isChangingStatus(user) ||
+                      (
+                        isCurrentUser(user) &&
+                        user.status === 'ACTIVE'
+                      )
+                    "
+                    [matTooltip]="
+                      isCurrentUser(user) &&
+                      user.status === 'ACTIVE'
+                        ? 'Você não pode desativar seu próprio usuário'
+                        : user.status === 'ACTIVE'
+                          ? 'Desativar usuário'
+                          : 'Ativar usuário'
+                    "
+                    (click)="
+                      toggleUserStatus(
+                        user
+                      )
+                    "
+                  >
+
+                    <mat-spinner
+                      *ngIf="
+                        isChangingStatus(user)
+                      "
+                      diameter="20"
+                    ></mat-spinner>
+
+                    <mat-icon
+                      *ngIf="
+                        !isChangingStatus(user)
+                      "
+                    >
+                      {{
+                        user.status ===
+                        'ACTIVE'
+                          ? 'block'
+                          : 'check_circle'
+                      }}
+                    </mat-icon>
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="
+          filteredUsers().length === 0
+        "
+      >
+        <mat-icon>
+          group_off
+        </mat-icon>
+
+        <h2>
+          Nenhum usuário encontrado
+        </h2>
+
+        <p>
+          Tente buscar por outro
+          nome ou e-mail.
+        </p>
+      </div>
+
+    </ng-container>
+
+  </mat-card>
+
+</section>
+
+
+<!-- =====================================
+     PAINEL LATERAL
+     ===================================== -->
+
+<div
+  class="editor-backdrop"
+  *ngIf="editorMode()"
+  (click)="closeEditor()"
+>
+
+  <aside
+    class="editor-panel"
+    [class.ready]="panelReady()"
+    (click)="
+      $event.stopPropagation()
+    "
+  >
+
+    <!-- =================================
+         CRIAR USUÁRIO
+         ================================= -->
+
+    <ng-container
+      *ngIf="
+        editorMode() ===
+        'create'
+      "
+    >
+
+      <header
+        class="editor-header"
+      >
+
+        <div>
+          <span
+            class="editor-eyebrow"
+          >
+            Novo acesso
+          </span>
+
+          <h2>
+            Criar Usuário
+          </h2>
+
+          <p>
+            Cadastre um novo usuário
+            com acesso ao sistema.
+          </p>
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Fechar"
+          (click)="closeEditor()"
+        >
+          <mat-icon>
+            close
+          </mat-icon>
+        </button>
+
+      </header>
+
+
+      <div
+        class="editor-content"
+      >
+
+        <form
+          class="access-form"
+          [formGroup]="
+            createUserForm
+          "
+        >
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              Nome
+            </mat-label>
+
+            <input
+              matInput
+              type="text"
+              autocomplete="name"
+              formControlName="name"
+              placeholder="Nome completo"
+            />
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('name')
+                  ?.hasError(
+                    'required'
+                  )
+              "
+            >
+              Informe o nome.
+            </mat-error>
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('name')
+                  ?.hasError(
+                    'minlength'
+                  )
+              "
+            >
+              Informe pelo menos
+              2 caracteres.
+            </mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              E-mail
+            </mat-label>
+
+            <input
+              matInput
+              type="email"
+              autocomplete="email"
+              formControlName="email"
+              placeholder="usuario@empresa.com"
+            />
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('email')
+                  ?.hasError(
+                    'required'
+                  )
+              "
+            >
+              Informe o e-mail.
+            </mat-error>
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('email')
+                  ?.hasError(
+                    'email'
+                  )
+              "
+            >
+              Informe um e-mail válido.
+            </mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              Senha
+            </mat-label>
+
+            <input
+              matInput
+              type="password"
+              autocomplete="new-password"
+              formControlName="password"
+              placeholder="Mínimo de 6 caracteres"
+            />
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('password')
+                  ?.hasError(
+                    'required'
+                  )
+              "
+            >
+              Informe a senha.
+            </mat-error>
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get('password')
+                  ?.hasError(
+                    'minlength'
+                  )
+              "
+            >
+              A senha deve possuir
+              pelo menos 6 caracteres.
+            </mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              Confirmar Senha
+            </mat-label>
+
+            <input
+              matInput
+              type="password"
+              autocomplete="new-password"
+              formControlName="
+                passwordConfirmation
+              "
+              placeholder="Digite novamente a senha"
+            />
+
+            <mat-error
+              *ngIf="
+                createUserForm
+                  .get(
+                    'passwordConfirmation'
+                  )
+                  ?.hasError(
+                    'required'
+                  )
+              "
+            >
+              Confirme a senha.
+            </mat-error>
+          </mat-form-field>
+
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              Nível de Acesso
+            </mat-label>
+
+            <mat-select
+              formControlName="role"
+            >
+
+              <mat-option
+                value="ADMIN"
+              >
+                Admin
+              </mat-option>
+
+              <mat-option
+                value="OPERATOR"
+              >
+                Operador
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+
+
+          <div
+            class="role-explanation"
+          >
+
+            <div>
+              <mat-icon>
+                verified_user
+              </mat-icon>
+
+              <div>
+                <strong>
+                  Admin
+                </strong>
+
+                <span>
+                  Pode gerenciar usuários,
+                  permissões e demais
+                  funcionalidades.
+                </span>
+              </div>
+            </div>
+
+
+            <div>
+              <mat-icon>
+                person
+              </mat-icon>
+
+              <div>
+                <strong>
+                  Operador
+                </strong>
+
+                <span>
+                  Possui acesso operacional,
+                  sem gerenciamento
+                  de usuários.
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+
+      <footer
+        class="editor-footer"
+      >
+
+        <button
+          mat-button
+          type="button"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="saving()"
+          (click)="createUser()"
+        >
+
+          <mat-spinner
+            *ngIf="saving()"
+            diameter="18"
+          ></mat-spinner>
+
+          <mat-icon
+            *ngIf="!saving()"
+          >
+            person_add
+          </mat-icon>
+
+          {{
+            saving()
+              ? 'Criando...'
+              : 'Criar Usuário'
+          }}
+
+        </button>
+
+      </footer>
+
+    </ng-container>
+
+
+    <!-- =================================
+         EDITAR PERMISSÕES
+         ================================= -->
+
+    <ng-container
+      *ngIf="
+        editorMode() ===
+        'permissions'
+      "
+    >
+
+      <header
+        class="editor-header"
+      >
+
+        <div>
+          <span
+            class="editor-eyebrow"
+          >
+            Controle de acesso
+          </span>
+
+          <h2>
+            Editar Permissões
+          </h2>
+
+          <p>
+            Altere o nível de acesso
+            deste usuário.
+          </p>
+        </div>
+
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Fechar"
+          (click)="closeEditor()"
+        >
+          <mat-icon>
+            close
+          </mat-icon>
+        </button>
+
+      </header>
+
+
+      <div
+        class="editor-content"
+      >
+
+        <div
+          class="selected-user"
+        >
+
+          <div
+            class="selected-avatar"
+          >
+            {{
+              selectedUser()
+                ?.name
+                ?.charAt(0)
+                ?.toUpperCase()
+            }}
+          </div>
+
+          <div
+            class="selected-user-data"
+          >
+            <strong>
+              {{
+                selectedUser()?.name
+              }}
+            </strong>
+
+            <span>
+              {{
+                selectedUser()?.email
+              }}
+            </span>
+
+            <span
+              class="status-badge selected-status"
+              [class.active]="
+                selectedUser()?.status ===
+                'ACTIVE'
+              "
+              [class.inactive]="
+                selectedUser()?.status ===
+                'INACTIVE'
+              "
+            >
+              <span
+                class="status-dot"
+              ></span>
+
+              {{
+                selectedUser()
+                  ? statusLabel(
+                      selectedUser()!.status
+                    )
+                  : ''
+              }}
+            </span>
+          </div>
+
+        </div>
+
+
+        <form
+          class="access-form"
+          [formGroup]="
+            permissionsForm
+          "
+        >
+
+          <mat-form-field
+            appearance="outline"
+          >
+            <mat-label>
+              Nível de Acesso
+            </mat-label>
+
+            <mat-select
+              formControlName="role"
+            >
+
+              <mat-option
+                value="ADMIN"
+              >
+                Admin
+              </mat-option>
+
+              <mat-option
+                value="OPERATOR"
+              >
+                Operador
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+
+        </form>
+
+
+        <div
+          class="permission-options"
+        >
+
+          <div
+            class="permission-card"
+            [class.selected]="
+              permissionsForm
+                .get('role')
+                ?.value ===
+                'ADMIN'
+            "
+            (click)="
+              permissionsForm
+                .get('role')
+                ?.setValue(
+                  'ADMIN'
+                )
+            "
+          >
+
+            <mat-icon>
+              verified_user
+            </mat-icon>
+
+            <div>
+              <strong>
+                Admin
+              </strong>
+
+              <span>
+                Acesso administrativo,
+                incluindo gerenciamento
+                de usuários e permissões.
+              </span>
+            </div>
+
+          </div>
+
+
+          <div
+            class="permission-card"
+            [class.selected]="
+              permissionsForm
+                .get('role')
+                ?.value ===
+                'OPERATOR'
+            "
+            (click)="
+              permissionsForm
+                .get('role')
+                ?.setValue(
+                  'OPERATOR'
+                )
+            "
+          >
+
+            <mat-icon>
+              person
+            </mat-icon>
+
+            <div>
+              <strong>
+                Operador
+              </strong>
+
+              <span>
+                Acesso às funcionalidades
+                operacionais do sistema.
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <footer
+        class="editor-footer"
+      >
+
+        <button
+          mat-button
+          type="button"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="saving()"
+          (click)="savePermissions()"
+        >
+
+          <mat-spinner
+            *ngIf="saving()"
+            diameter="18"
+          ></mat-spinner>
+
+          <mat-icon
+            *ngIf="!saving()"
+          >
+            save
+          </mat-icon>
+
+          {{
+            saving()
+              ? 'Salvando...'
+              : 'Salvar Permissões'
+          }}
+
+        </button>
+
+      </footer>
+
+    </ng-container>
+
+  </aside>
+
+</div>

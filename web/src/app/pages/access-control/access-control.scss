@@ -1,0 +1,835 @@
+:host {
+  display: block;
+}
+
+.page {
+  width: 100%;
+  max-width: 1280px;
+
+  margin: 0 auto;
+
+  padding: 32px;
+
+  box-sizing: border-box;
+}
+
+/* ========================================
+   CABEÇALHO
+   ======================================== */
+
+.page-header {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 6px;
+
+    color: #111827;
+
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+  }
+
+  > button {
+    flex-shrink: 0;
+
+    border-radius: 24px;
+
+    padding: 0 20px;
+  }
+}
+
+/* ========================================
+   CARD
+   ======================================== */
+
+.users-card {
+  width: 100%;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+}
+
+.toolbar {
+  padding: 20px 20px 4px;
+
+  border-bottom:
+    1px solid #eef0f3;
+}
+
+.search-field {
+  width: min(
+    460px,
+    100%
+  );
+}
+
+/* ========================================
+   TABELA
+   ======================================== */
+
+.table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding:
+      18px 18px;
+
+    text-align: left;
+    vertical-align: middle;
+
+    border-bottom:
+      1px solid #eef0f3;
+  }
+
+  th {
+    background: #fafafa;
+
+    color: #6b7280;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    white-space: nowrap;
+  }
+
+  td {
+    color: #374151;
+
+    font-size: 13.5px;
+  }
+
+  tbody tr {
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+
+    &:hover {
+      background: #fafbfc;
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+
+    &.inactive-row {
+      background: #fafafa;
+
+      .user-avatar {
+        background: #f0f1f3;
+        color: #858b96;
+      }
+
+      .user-name {
+        color: #667085;
+      }
+    }
+  }
+}
+
+/* ========================================
+   USUÁRIO
+   ======================================== */
+
+.user-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+}
+
+.user-avatar,
+.selected-avatar {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #eaf1ff;
+
+  color: #004fdf;
+
+  font-weight: 700;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+
+  font-size: 13px;
+}
+
+.user-name-wrapper {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.user-name {
+  color: #111827;
+
+  font-weight: 600;
+}
+
+.current-user-label {
+  color: #667085;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.email-column {
+  color: #667085 !important;
+}
+
+.last-login {
+  color: #667085 !important;
+
+  white-space: nowrap;
+}
+
+/* ========================================
+   NÍVEL
+   ======================================== */
+
+.role-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+
+    font-size: 16px;
+  }
+
+  &.admin {
+    color: #075ac8;
+
+    background: #e9f2ff;
+  }
+
+  &.operator {
+    color: #6b4f00;
+
+    background: #fff4d6;
+  }
+}
+
+/* ========================================
+   STATUS
+   ======================================== */
+
+.status-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  &.active {
+    color: #047857;
+
+    background: #ecfdf5;
+
+    .status-dot {
+      background: #10b981;
+    }
+  }
+
+  &.inactive {
+    color: #667085;
+
+    background: #f2f4f7;
+
+    .status-dot {
+      background: #98a2b3;
+    }
+  }
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+}
+
+/* ========================================
+   AÇÕES
+   ======================================== */
+
+.actions-column {
+  width: 235px;
+
+  text-align: right !important;
+
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 5px;
+}
+
+.edit-permissions-button {
+  font-size: 12px;
+
+  mat-icon {
+    margin-right: 5px;
+
+    font-size: 18px;
+  }
+}
+
+/* ========================================
+   LOADING
+   ======================================== */
+
+.loading {
+  min-height: 320px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.error-state,
+.empty-state {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  text-align: center;
+
+  box-sizing: border-box;
+
+  > mat-icon {
+    width: 48px;
+    height: 48px;
+
+    margin-bottom: 10px;
+
+    color: #9ca3af;
+
+    font-size: 48px;
+  }
+
+  h2 {
+    margin: 0 0 6px;
+
+    color: #111827;
+
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0 0 16px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+  }
+}
+
+.error-state {
+  > mat-icon {
+    color: #d92d20;
+  }
+}
+
+/* ========================================
+   BACKDROP
+   ======================================== */
+
+.editor-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  background:
+    rgba(
+      15,
+      23,
+      42,
+      0.45
+    );
+}
+
+/* ========================================
+   PAINEL
+   ======================================== */
+
+.editor-panel {
+  width:
+    min(
+      560px,
+      95vw
+    );
+
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f8fafc;
+
+  box-shadow:
+    -10px 0 32px
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
+
+  opacity: 0;
+
+  transform:
+    translateX(8px);
+
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+
+  &.ready {
+    opacity: 1;
+
+    transform:
+      translateX(0);
+  }
+}
+
+/* ========================================
+   HEADER DO PAINEL
+   ======================================== */
+
+.editor-header {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding:
+    24px 30px;
+
+  background: white;
+
+  border-bottom:
+    1px solid #e5e7eb;
+
+  h2 {
+    margin:
+      4px 0 5px;
+
+    color: #111827;
+
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 13px;
+  }
+}
+
+.editor-eyebrow {
+  color: #667085;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ========================================
+   CONTEÚDO
+   ======================================== */
+
+.editor-content {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding:
+    28px 30px;
+
+  box-sizing: border-box;
+}
+
+.access-form {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   NÍVEIS
+   ======================================== */
+
+.role-explanation {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 8px;
+
+  > div {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border:
+      1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    background: white;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+
+    color: #667085;
+  }
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    margin-bottom: 3px;
+
+    color: #111827;
+
+    font-size: 13px;
+  }
+
+  span {
+    color: #667085;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+  }
+}
+
+/* ========================================
+   USUÁRIO SELECIONADO
+   ======================================== */
+
+.selected-user {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 16px;
+
+  margin-bottom: 22px;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  background: white;
+
+  .selected-avatar {
+    width: 44px;
+    height: 44px;
+
+    font-size: 15px;
+  }
+}
+
+.selected-user-data {
+  min-width: 0;
+
+  strong,
+  > span:not(.status-badge) {
+    display: block;
+  }
+
+  strong {
+    margin-bottom: 3px;
+
+    color: #111827;
+
+    font-size: 14px;
+  }
+
+  > span:not(.status-badge) {
+    color: #667085;
+
+    font-size: 12px;
+  }
+}
+
+.selected-status {
+  margin-top: 8px;
+}
+
+/* ========================================
+   PERMISSÕES
+   ======================================== */
+
+.permission-options {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 8px;
+}
+
+.permission-card {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 13px;
+
+  padding: 16px;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  background: white;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  mat-icon {
+    flex-shrink: 0;
+
+    color: #667085;
+  }
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    margin-bottom: 4px;
+
+    color: #111827;
+
+    font-size: 14px;
+  }
+
+  span {
+    color: #667085;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+  }
+
+  &:hover {
+    border-color: #b5c7eb;
+  }
+
+  &.selected {
+    border-color: #004fdf;
+
+    background: #f3f7ff;
+
+    box-shadow:
+      0 0 0 1px
+      rgba(
+        0,
+        79,
+        223,
+        0.08
+      );
+
+    mat-icon {
+      color: #004fdf;
+    }
+  }
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.editor-footer {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    16px 30px;
+
+  background: white;
+
+  border-top:
+    1px solid #e5e7eb;
+
+  button {
+    min-width: 120px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+
+    margin-right: 8px;
+  }
+}
+
+/* ========================================
+   RESPONSIVO
+   ======================================== */
+
+@media (
+  max-width: 1100px
+) {
+  .users-table {
+    min-width: 1050px;
+  }
+}
+
+@media (
+  max-width: 700px
+) {
+  .page {
+    padding: 20px;
+  }
+
+  .page-header {
+    flex-direction: column;
+
+    > button {
+      width: 100%;
+    }
+  }
+
+  .editor-panel {
+    width: 100%;
+  }
+
+  .editor-header {
+    padding: 20px;
+  }
+
+  .editor-content {
+    padding:
+      22px 20px;
+  }
+
+  .editor-footer {
+    padding:
+      14px 20px;
+  }
+}
