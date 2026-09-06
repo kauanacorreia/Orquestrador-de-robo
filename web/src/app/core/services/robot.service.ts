@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Robot, RobotSchema } from '../models/robot.model';
+import { Robot, RobotSchema, RobotEditLog } from '../models/robot.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +20,20 @@ export class RobotService {
     return this.http.get<Robot>(`${this.baseUrl}/${id}`);
   }
 
-  create(name: string, description: string, schema: RobotSchema): Observable<Robot> {
-    return this.http.post<Robot>(this.baseUrl, { name, description, schema });
+  create(name: string, description: string, department: string, schema: RobotSchema): Observable<Robot> {
+    return this.http.post<Robot>(this.baseUrl, { name, description, department, schema });
+  }
+
+  update(
+    id: string,
+    changes: { name?: string; description?: string; department?: string; schema?: RobotSchema },
+    userId: string | null
+  ): Observable<Robot> {
+    return this.http.patch<Robot>(`${this.baseUrl}/${id}`, { ...changes, user_id: userId });
+  }
+
+  toggleStatus(id: string, userId: string | null): Observable<Robot> {
+    return this.http.patch<Robot>(`${this.baseUrl}/${id}/toggle_status`, { user_id: userId });
   }
 
   newVersion(id: string, schema: RobotSchema): Observable<Robot> {
@@ -30,5 +42,9 @@ export class RobotService {
 
   versions(id: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/${id}/versions`);
+  }
+
+  editLogs(id: string): Observable<RobotEditLog[]> {
+    return this.http.get<RobotEditLog[]>(`${this.baseUrl}/${id}/edit_logs`);
   }
 }

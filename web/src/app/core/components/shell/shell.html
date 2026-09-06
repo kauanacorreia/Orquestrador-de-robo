@@ -1,31 +1,135 @@
-<div class="shell">
-
+<div
+  class="shell"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>
   <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-icon">
-        <mat-icon>smart_toy</mat-icon>
+
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-icon">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+
+        <span
+          class="brand-text"
+          *ngIf="!sidebarCollapsed()"
+        >
+          Orquestrador RPA
+        </span>
       </div>
-      <span>Orquestrador RPA</span>
+
+      <button
+        type="button"
+        class="collapse-button"
+        (click)="toggleSidebar()"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Expandir menu'
+            : 'Minimizar menu'
+        "
+        matTooltipPosition="right"
+        aria-label="Minimizar ou expandir menu"
+      >
+        <mat-icon>
+          {{
+            sidebarCollapsed()
+              ? 'chevron_right'
+              : 'chevron_left'
+          }}
+        </mat-icon>
+      </button>
     </div>
 
     <nav>
-      <a routerLink="/home" routerLinkActive="active">
+
+      <a
+        routerLink="/home"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Dashboard'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
         <mat-icon>dashboard</mat-icon>
-        Dashboard
+
+        <span *ngIf="!sidebarCollapsed()">
+          Dashboard
+        </span>
       </a>
-      <a routerLink="/robots" routerLinkActive="active">
+
+      <a
+        routerLink="/robots"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Robôs'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
         <mat-icon>smart_toy</mat-icon>
-        Robôs
+
+        <span *ngIf="!sidebarCollapsed()">
+          Robôs
+        </span>
       </a>
+
+      <a
+        routerLink="/parametros"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Empresas'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>business</mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Empresas
+        </span>
+      </a>
+
+      <a
+        routerLink="/acessos"
+        routerLinkActive="active"
+        class="access-control-link"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Controle de Acessos'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>manage_accounts</mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Controle de Acessos
+        </span>
+      </a>
+
     </nav>
 
     <div class="sidebar-footer">
-      <span>Wölfer</span>
+      <span *ngIf="!sidebarCollapsed()">
+        Woelfer
+      </span>
+
+      <mat-icon
+        *ngIf="sidebarCollapsed()"
+        matTooltip="Woelfer"
+        matTooltipPosition="right"
+      >
+        apartment
+      </mat-icon>
     </div>
+
   </aside>
 
   <main class="content">
     <router-outlet></router-outlet>
   </main>
-
 </div>

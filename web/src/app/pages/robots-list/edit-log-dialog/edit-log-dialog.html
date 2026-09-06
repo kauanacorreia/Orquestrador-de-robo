@@ -1,0 +1,233 @@
+<h2 mat-dialog-title class="dialog-title">
+  Histórico de edições
+  <span>— {{ data.robot.name }}</span>
+</h2>
+
+<mat-dialog-content class="log-content">
+
+  @if (loading()) {
+
+    <div class="loading-row">
+
+      <mat-spinner diameter="28">
+      </mat-spinner>
+
+      <span>
+        Carregando histórico...
+      </span>
+
+    </div>
+
+  } @else if (errorMessage()) {
+
+    <div class="error">
+
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <span>
+        {{ errorMessage() }}
+      </span>
+
+    </div>
+
+  } @else if (logs().length === 0) {
+
+    <div class="empty">
+
+      <mat-icon>
+        history
+      </mat-icon>
+
+      <span>
+        Nenhuma edição registrada ainda.
+      </span>
+
+    </div>
+
+  } @else {
+
+    <div class="log-list">
+
+      @for (log of logs(); track log.id) {
+
+        <article class="log-item">
+
+          <div class="log-header">
+
+            <span class="field-name">
+              {{ fieldLabel(log.field_name) }}
+            </span>
+
+            <span class="log-date">
+              {{
+                log.created_at
+                  | date:'dd/MM/yyyy HH:mm'
+              }}
+            </span>
+
+          </div>
+
+
+          <!-- ALTERAÇÃO EM CAMPO DO SCHEMA -->
+
+          @if (isSchemaChange(log)) {
+
+            <div class="schema-change">
+
+              <div class="schema-version old">
+
+                <span class="version-label">
+                  Antes
+                </span>
+
+                @if (log.old_value) {
+
+                  <strong class="schema-title">
+                    {{ schemaLabel(log.old_value) }}
+                  </strong>
+
+                  <div class="schema-details">
+
+                    <div class="detail-row">
+                      <span>Nome do campo</span>
+                      <strong>
+                        {{ schemaName(log.old_value) }}
+                      </strong>
+                    </div>
+
+                    <div class="detail-row">
+                      <span>Tipo</span>
+                      <strong>
+                        {{ schemaType(log.old_value) }}
+                      </strong>
+                    </div>
+
+                    <div class="detail-row">
+                      <span>Obrigatório</span>
+                      <strong>
+                        {{ schemaRequired(log.old_value) }}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                } @else {
+
+                  <span class="empty-value">
+                    Campo inexistente
+                  </span>
+
+                }
+
+              </div>
+
+
+              <div class="change-arrow">
+
+                <mat-icon>
+                  arrow_forward
+                </mat-icon>
+
+              </div>
+
+
+              <div class="schema-version new">
+
+                <span class="version-label">
+                  Depois
+                </span>
+
+                @if (log.new_value) {
+
+                  <strong class="schema-title">
+                    {{ schemaLabel(log.new_value) }}
+                  </strong>
+
+                  <div class="schema-details">
+
+                    <div class="detail-row">
+                      <span>Nome do campo</span>
+                      <strong>
+                        {{ schemaName(log.new_value) }}
+                      </strong>
+                    </div>
+
+                    <div class="detail-row">
+                      <span>Tipo</span>
+                      <strong>
+                        {{ schemaType(log.new_value) }}
+                      </strong>
+                    </div>
+
+                    <div class="detail-row">
+                      <span>Obrigatório</span>
+                      <strong>
+                        {{ schemaRequired(log.new_value) }}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                } @else {
+
+                  <span class="empty-value">
+                    Campo removido
+                  </span>
+
+                }
+
+              </div>
+
+            </div>
+
+          }
+
+          <!-- ALTERAÇÕES SIMPLES -->
+
+          @else {
+
+            <div class="simple-change">
+
+              <span class="old-value">
+                {{ simpleValue(log.old_value) }}
+              </span>
+
+              <mat-icon>
+                arrow_forward
+              </mat-icon>
+
+              <span class="new-value">
+                {{ simpleValue(log.new_value) }}
+              </span>
+
+            </div>
+
+          }
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+</mat-dialog-content>
+
+
+<mat-dialog-actions
+  align="end"
+  class="dialog-actions"
+>
+
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="close()"
+  >
+    Fechar
+  </button>
+
+</mat-dialog-actions>
