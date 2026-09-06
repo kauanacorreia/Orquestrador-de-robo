@@ -10,144 +10,97 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_034000) do
-  create_schema "extensions"
-
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "extensions.pg_stat_statements"
-  enable_extension "extensions.pgcrypto"
-  enable_extension "extensions.uuid-ossp"
-  enable_extension "pg_catalog.plpgsql"
-  enable_extension "vault.supabase_vault"
-
-  create_table "public.companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.text "access_password"
-    t.text "account_number"
-    t.text "cnpj", null: false
-    t.text "code"
-    t.text "company_folder"
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.text "monetary_variation"
-    t.text "name", null: false
-    t.text "notification_email"
-    t.text "pis_pasep"
-    t.text "secret_phrase"
-    t.boolean "simple_national_opt_in", default: false, null: false
-    t.text "state_registration"
-    t.text "status", default: "ACTIVE", null: false
-    t.text "tax_regime"
-    t.timestamptz "updated_at", default: -> { "now()" }, null: false
-    t.index ["code"], name: "index_companies_on_code", unique: true
-    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "companies_status_check"
-    t.unique_constraint ["cnpj"], name: "companies_cnpj_key"
-  end
-
-  create_table "public.company_robot_configs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "company_id", null: false
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.jsonb "parameters", default: {}, null: false
-    t.uuid "robot_id", null: false
-    t.timestamptz "updated_at", default: -> { "now()" }, null: false
-    t.index ["company_id"], name: "idx_company_robot_configs_company"
-    t.index ["robot_id"], name: "idx_company_robot_configs_robot"
-    t.unique_constraint ["company_id", "robot_id"], name: "company_robot_configs_company_id_robot_id_key"
-  end
-
-  create_table "public.execution_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.uuid "execution_id", null: false
-    t.text "level", default: "INFO", null: false
-    t.text "message", null: false
-    t.index ["created_at"], name: "idx_execution_logs_created_at"
-    t.index ["execution_id"], name: "idx_execution_logs_execution"
-    t.check_constraint "level = ANY (ARRAY['INFO'::text, 'WARNING'::text, 'ERROR'::text, 'DEBUG'::text])", name: "execution_logs_level_check"
-  end
-
-  create_table "public.executions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "company_id", null: false
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.text "error_message"
-    t.timestamptz "finished_at"
-    t.timestamptz "locked_at"
-    t.uuid "robot_id", null: false
-    t.uuid "schedule_id"
-    t.timestamptz "started_at"
-    t.text "status", default: "PENDING", null: false
-    t.index ["company_id"], name: "idx_executions_company"
-    t.index ["created_at"], name: "idx_executions_created_at"
-    t.index ["robot_id"], name: "idx_executions_robot"
-    t.index ["status"], name: "idx_executions_status"
-    t.check_constraint "status = ANY (ARRAY['PENDING'::text, 'RUNNING'::text, 'SUCCESS'::text, 'FAILED'::text])", name: "executions_status_check"
-  end
-
-  create_table "public.profiles", id: :uuid, default: nil, force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.text "email"
-    t.timestamptz "last_login"
-    t.datetime "last_login_at"
-    t.text "name", null: false
-    t.text "role", default: "OPERATOR", null: false
-    t.text "status", default: "ACTIVE", null: false
-    t.index ["email"], name: "index_profiles_on_email", unique: true
-    t.index ["status"], name: "index_profiles_on_status"
-    t.check_constraint "role = ANY (ARRAY['ADMIN'::text, 'OPERATOR'::text])", name: "profiles_role_check"
-    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "profiles_status_check"
-  end
-
-  create_table "public.robot_edit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+ActiveRecord::Schema[8.1].define(version: 2026_09_05_223256) do
+  create_table "companies", id: :string, force: :cascade do |t|
+    t.string "cnpj", null: false
     t.datetime "created_at", null: false
-    t.string "field_name", null: false
-    t.text "new_value"
-    t.text "old_value"
-    t.uuid "robot_id", null: false
+    t.string "email"
+    t.string "name", null: false
+    t.string "phone"
+    t.string "status", default: "active", null: false
+    t.string "trade_name"
     t.datetime "updated_at", null: false
-    t.uuid "user_id"
-    t.index ["robot_id"], name: "index_robot_edit_logs_on_robot_id"
+    t.index ["cnpj"], name: "index_companies_on_cnpj", unique: true
   end
 
-  create_table "public.robot_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.uuid "robot_id", null: false
-    t.jsonb "schema", null: false
+  create_table "executions", id: :string, force: :cascade do |t|
+    t.string "company_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "duration_ms"
+    t.datetime "finished_at"
+    t.string "robot_name", null: false
+    t.string "schedule_id"
+    t.datetime "started_at", null: false
+    t.string "status", default: "running", null: false
+    t.string "triggered_by", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_executions_on_company_id"
+    t.index ["schedule_id"], name: "index_executions_on_schedule_id"
+    t.index ["started_at"], name: "index_executions_on_started_at"
+    t.index ["status"], name: "index_executions_on_status"
+    t.index ["triggered_by"], name: "index_executions_on_triggered_by"
+  end
+
+  create_table "log_entries", id: :string, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "execution_id", null: false
+    t.string "level", null: false
+    t.text "message", null: false
+    t.datetime "timestamp", null: false
+    t.datetime "updated_at", null: false
+    t.index ["execution_id", "timestamp"], name: "index_log_entries_on_execution_id_and_timestamp"
+    t.index ["execution_id"], name: "index_log_entries_on_execution_id"
+  end
+
+  create_table "profiles", id: :string, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_login"
+    t.string "name"
+    t.string "role"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "robot_versions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "robot_id", null: false
+    t.json "schema"
+    t.datetime "updated_at", null: false
     t.integer "version", null: false
-    t.index ["robot_id", "version"], name: "idx_robot_versions_robot_version", unique: true
+    t.index ["robot_id", "version"], name: "index_robot_versions_on_robot_id_and_version", unique: true
+    t.index ["robot_id"], name: "index_robot_versions_on_robot_id"
   end
 
-  create_table "public.robots", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
+  create_table "robots", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.integer "current_version", default: 1, null: false
-    t.text "department"
     t.text "description"
-    t.text "name", null: false
-    t.jsonb "schema", default: {"fields" => []}, null: false
-    t.text "status", default: "ACTIVE", null: false
-    t.timestamptz "updated_at", default: -> { "now()" }, null: false
-    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "robots_status_check"
+    t.string "name", null: false
+    t.json "schema"
+    t.string "status", default: "ACTIVE", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_robots_on_status"
   end
 
-  create_table "public.schedules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "company_id", null: false
-    t.timestamptz "created_at", default: -> { "now()" }, null: false
-    t.text "cron_expression", null: false
-    t.timestamptz "next_execution"
-    t.uuid "robot_id", null: false
-    t.text "status", default: "ACTIVE", null: false
-    t.timestamptz "updated_at", default: -> { "now()" }, null: false
-    t.index ["company_id"], name: "idx_schedules_company"
-    t.index ["robot_id"], name: "idx_schedules_robot"
-    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'PAUSED'::text])", name: "schedules_status_check"
+  create_table "schedules", id: :string, force: :cascade do |t|
+    t.string "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "frequency", null: false
+    t.datetime "last_run_at"
+    t.string "last_run_status"
+    t.string "name", null: false
+    t.datetime "next_run_at"
+    t.string "robot_name", null: false
+    t.datetime "scheduled_at", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_schedules_on_company_id"
+    t.index ["next_run_at"], name: "index_schedules_on_next_run_at"
+    t.index ["status"], name: "index_schedules_on_status"
   end
 
-  add_foreign_key "public.company_robot_configs", "public.companies", name: "company_robot_configs_company_id_fkey", on_delete: :cascade
-  add_foreign_key "public.company_robot_configs", "public.robots", name: "company_robot_configs_robot_id_fkey", on_delete: :cascade
-  add_foreign_key "public.execution_logs", "public.executions", name: "execution_logs_execution_id_fkey", on_delete: :cascade
-  add_foreign_key "public.executions", "public.companies", name: "executions_company_id_fkey", on_delete: :cascade
-  add_foreign_key "public.executions", "public.robots", name: "executions_robot_id_fkey", on_delete: :cascade
-  add_foreign_key "public.executions", "public.schedules", name: "executions_schedule_id_fkey", on_delete: :nullify
-  add_foreign_key "public.profiles", "auth.users", column: "id", name: "profiles_id_fkey", on_delete: :cascade
-  add_foreign_key "public.robot_edit_logs", "public.robots"
-  add_foreign_key "public.robot_versions", "public.robots", name: "robot_versions_robot_id_fkey", on_delete: :cascade
-  add_foreign_key "public.schedules", "public.companies", name: "schedules_company_id_fkey", on_delete: :cascade
-  add_foreign_key "public.schedules", "public.robots", name: "schedules_robot_id_fkey", on_delete: :cascade
-
+  add_foreign_key "executions", "companies"
+  add_foreign_key "executions", "schedules"
+  add_foreign_key "log_entries", "executions"
+  add_foreign_key "robot_versions", "robots"
+  add_foreign_key "schedules", "companies"
 end
