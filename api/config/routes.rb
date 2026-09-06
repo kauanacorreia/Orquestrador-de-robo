@@ -6,10 +6,12 @@ Rails.application.routes.draw do
   namespace :api do
     get "health", to: "health#show"
 
-    resources :robots, only: [:index, :show, :create] do
+    resources :robots, only: [:index, :show, :create, :update] do
       member do
         post :new_version
         get :versions
+        patch :toggle_status
+        get :edit_logs
       end
     end
 
