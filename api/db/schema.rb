@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_005829) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_015007) do
   create_schema "extensions"
 
   # These are extensions that must be enabled in order to support this database
@@ -21,14 +21,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_005829) do
   enable_extension "vault.supabase_vault"
 
   create_table "public.companies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "access_password"
+    t.text "account_number"
     t.text "cnpj", null: false
+    t.text "code"
+    t.text "company_folder"
     t.timestamptz "created_at", default: -> { "now()" }, null: false
+    t.text "monetary_variation"
     t.text "name", null: false
     t.text "notification_email"
+    t.text "pis_pasep"
+    t.text "secret_phrase"
+    t.boolean "simple_national_opt_in", default: false, null: false
     t.text "state_registration"
     t.text "status", default: "ACTIVE", null: false
+    t.text "tax_regime"
     t.timestamptz "updated_at", default: -> { "now()" }, null: false
-
+    t.index ["code"], name: "index_companies_on_code", unique: true
     t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "companies_status_check"
     t.unique_constraint ["cnpj"], name: "companies_cnpj_key"
   end

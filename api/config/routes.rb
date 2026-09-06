@@ -20,13 +20,14 @@ Rails.application.routes.draw do
     get "dashboard/filter_options", to: "dashboard#filter_options"
 
     namespace :v1 do
-      resources :companies, only: [:index] do
-        get "robots/:robot_id",
-            to: "company_robot_configs#show"
-
-        put "robots/:robot_id",
-            to: "company_robot_configs#update"
-      end
+  resources :companies, only: [:index, :show, :create, :update] do
+    member do
+      patch :toggle_status
     end
+
+    get "robots/:robot_id", to: "company_robot_configs#show"
+    put "robots/:robot_id", to: "company_robot_configs#update"
+  end
+end
   end
 end
