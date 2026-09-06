@@ -1,7 +1,44 @@
+export type CompanyStatus = 'ACTIVE' | 'INACTIVE';
+
 export interface CompanyOption {
   id: string;
+  code: string | null;
   name: string;
-  status: string;
+  status: CompanyStatus;
+}
+
+export interface Company extends CompanyOption {
+  company_folder: string | null;
+  cnpj: string;
+  state_registration: string | null;
+  tax_regime: string | null;
+  simple_national_opt_in: boolean;
+  pis_pasep: string | null;
+  monetary_variation: string | null;
+  account_number: string | null;
+  notification_email: string | null;
+
+  access_password_configured: boolean;
+  secret_phrase_configured: boolean;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompanyPayload {
+  code: string;
+  name: string;
+  company_folder?: string | null;
+  cnpj: string;
+  state_registration?: string | null;
+  tax_regime?: string | null;
+  simple_national_opt_in: boolean;
+  pis_pasep?: string | null;
+  monetary_variation?: string | null;
+  account_number?: string | null;
+  notification_email?: string | null;
+  access_password?: string;
+  secret_phrase?: string;
 }
 
 export interface ParameterField {

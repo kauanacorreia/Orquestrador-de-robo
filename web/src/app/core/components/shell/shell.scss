@@ -2,29 +2,76 @@
   --color-primary: #004fdf;
   --font-display: 'Manrope', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  display: block;
+  min-height: 100vh;
 }
 
 .shell {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+
+  overflow-x: hidden;
 }
+
+/* ========================================
+   SIDEBAR
+   ======================================== */
 
 .sidebar {
   width: 220px;
-  flex-shrink: 0;
+
+  flex: 0 0 220px;
+
+  min-height: 100vh;
+
   background: #14181f;
   color: white;
+
   display: flex;
   flex-direction: column;
+
   padding: 20px 0;
+
+  box-sizing: border-box;
+
+  transition:
+    width 0.2s ease,
+    flex-basis 0.2s ease;
+}
+
+.sidebar-collapsed {
+  .sidebar {
+    width: 72px;
+    flex-basis: 72px;
+  }
+}
+
+/* ========================================
+   TOPO
+   ======================================== */
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding: 0 12px 24px 20px;
 }
 
 .brand {
+  min-width: 0;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
-  padding: 0 20px 24px;
+
   font-family: var(--font-display);
+
   font-weight: 700;
   font-size: 14px;
 }
@@ -32,39 +79,161 @@
 .brand-icon {
   width: 32px;
   height: 32px;
+
+  min-width: 32px;
+
   border-radius: 9px;
+
   background: var(--color-primary);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   flex-shrink: 0;
+
+  mat-icon {
+    width: 21px;
+    height: 21px;
+
+    font-size: 21px;
+
+    color: white;
+  }
 }
+
+.brand-text {
+  white-space: nowrap;
+}
+
+.collapse-button {
+  width: 32px;
+  height: 32px;
+
+  min-width: 32px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #a0a7b4;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+  }
+}
+
+/* ========================================
+   MENU MINIMIZADO
+   ======================================== */
+
+.sidebar-collapsed {
+  .sidebar-top {
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding:
+      0
+      0
+      22px;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+
+    mat-icon {
+      width: 24px;
+      height: 24px;
+
+      font-size: 24px;
+    }
+  }
+
+  .collapse-button {
+    width: 40px;
+  }
+}
+
+/* ========================================
+   NAVEGAÇÃO
+   ======================================== */
 
 nav {
   display: flex;
   flex-direction: column;
+
   gap: 2px;
+
   padding: 0 12px;
+
   flex: 1;
 }
 
 nav a {
+  min-height: 42px;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
-  padding: 10px 12px;
+
+  padding: 0 12px;
+
   border-radius: 8px;
+
   color: #a0a7b4;
+
   text-decoration: none;
+
   font-family: var(--font-body);
+
   font-size: 13.5px;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
+
+  white-space: nowrap;
+
+  box-sizing: border-box;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 
   mat-icon {
-    font-size: 19px;
     width: 19px;
     height: 19px;
+
+    min-width: 19px;
+
+    font-size: 19px;
   }
 
   &:hover {
@@ -78,16 +247,152 @@ nav a {
   }
 }
 
-.sidebar-footer {
-  padding: 16px 20px 0;
-  font-size: 11px;
-  color: #5b6472;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: 12px;
-  padding-top: 16px;
+/* Menu recolhido */
+
+.sidebar-collapsed {
+  nav {
+    padding: 0 9px;
+  }
+
+  nav a {
+    width: 54px;
+    height: 46px;
+
+    padding: 0;
+
+    margin: 0 auto;
+
+    justify-content: center;
+
+    mat-icon {
+      width: 21px;
+      height: 21px;
+
+      font-size: 21px;
+    }
+  }
 }
+
+/* ========================================
+   RODAPÉ
+   ======================================== */
+
+.sidebar-footer {
+  min-height: 45px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 16px 20px 0;
+
+  margin-top: 12px;
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+
+  color: #5b6472;
+
+  font-family: var(--font-body);
+
+  font-size: 11px;
+}
+
+.sidebar-collapsed {
+  .sidebar-footer {
+    justify-content: center;
+
+    padding:
+      16px
+      0
+      0;
+
+    mat-icon {
+      width: 19px;
+      height: 19px;
+
+      font-size: 19px;
+    }
+  }
+}
+
+/* ========================================
+   CONTEÚDO
+   ======================================== */
 
 .content {
   flex: 1;
+
+  width: 0;
+  min-width: 0;
+
+  min-height: 100vh;
+
   overflow-y: auto;
+  overflow-x: hidden;
+
+  box-sizing: border-box;
+}
+
+/* ========================================
+   RESPONSIVO
+   ======================================== */
+
+@media (max-width: 720px) {
+  .sidebar {
+    width: 72px;
+    flex-basis: 72px;
+  }
+
+  .sidebar-top {
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding:
+      0
+      0
+      22px;
+  }
+
+  .brand-text,
+  nav a span,
+  .sidebar-footer span {
+    display: none;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  nav {
+    padding: 0 9px;
+  }
+
+  nav a {
+    width: 54px;
+    height: 46px;
+
+    justify-content: center;
+
+    padding: 0;
+
+    margin: 0 auto;
+  }
+
+  .sidebar-footer {
+    justify-content: center;
+
+    padding:
+      16px
+      0
+      0;
+  }
+
+  .collapse-button {
+    display: none;
+  }
 }

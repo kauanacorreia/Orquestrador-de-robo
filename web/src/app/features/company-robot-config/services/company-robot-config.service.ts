@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 import {
-  CompanyOption,
+  Company,
+  CompanyPayload,
   CompanyRobotConfigResponse,
   SaveCompanyRobotConfigResponse
 } from '../models/company-robot-config.model';
@@ -17,8 +18,42 @@ export class CompanyRobotConfigService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/v1`;
 
-  listCompanies(): Observable<CompanyOption[]> {
-    return this.http.get<CompanyOption[]>(`${this.baseUrl}/companies`);
+  listCompanies(): Observable<Company[]> {
+    return this.http.get<Company[]>(
+      `${this.baseUrl}/companies`
+    );
+  }
+
+  getCompany(companyId: string): Observable<Company> {
+    return this.http.get<Company>(
+      `${this.baseUrl}/companies/${companyId}`
+    );
+  }
+
+  createCompany(
+    payload: CompanyPayload
+  ): Observable<Company> {
+    return this.http.post<Company>(
+      `${this.baseUrl}/companies`,
+      payload
+    );
+  }
+
+  updateCompany(
+    companyId: string,
+    payload: CompanyPayload
+  ): Observable<Company> {
+    return this.http.patch<Company>(
+      `${this.baseUrl}/companies/${companyId}`,
+      payload
+    );
+  }
+
+  toggleStatus(companyId: string): Observable<Company> {
+    return this.http.patch<Company>(
+      `${this.baseUrl}/companies/${companyId}/toggle_status`,
+      {}
+    );
   }
 
   getConfiguration(

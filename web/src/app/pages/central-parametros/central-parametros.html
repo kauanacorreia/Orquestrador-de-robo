@@ -1,182 +1,822 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Central de Parâmetros</h1>
+      <h1>Empresas</h1>
+
       <p>
-        Configure os parâmetros utilizados por cada robô para uma empresa.
+        Gerencie os clientes e suas configurações de automação.
       </p>
     </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openCreate()"
+    >
+      <mat-icon>add</mat-icon>
+      Cadastrar Empresa
+    </button>
   </header>
 
-  <mat-card class="selection-card">
+  <mat-card class="toolbar-card">
     <mat-card-content>
-      <div class="selectors">
+      <div class="toolbar">
+        <mat-form-field
+          appearance="outline"
+          class="search-field"
+        >
+          <mat-label>
+            Buscar empresa
+          </mat-label>
+
+          <mat-icon matPrefix>
+            search
+          </mat-icon>
+
+          <input
+            matInput
+            [value]="searchTerm()"
+            placeholder="Código ou nome"
+            (input)="
+              setSearch(
+                $any($event.target).value
+              )
+            "
+          />
+        </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Empresa</mat-label>
+          <mat-label>Status</mat-label>
 
           <mat-select
-            [value]="selectedCompanyId()"
-            (selectionChange)="onCompanyChange($event.value)"
+            [value]="statusFilter()"
+            (selectionChange)="
+              setStatusFilter(
+                $event.value
+              )
+            "
           >
-            <mat-option
-              *ngFor="let company of companies()"
-              [value]="company.id"
-              [disabled]="company.status !== 'ACTIVE'"
-            >
-              {{ company.name }}
+            <mat-option value="ALL">
+              Todas
+            </mat-option>
+
+            <mat-option value="ACTIVE">
+              Ativas
+            </mat-option>
+
+            <mat-option value="INACTIVE">
+              Inativas
             </mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Robô</mat-label>
+          <mat-label>
+            Ordenar por
+          </mat-label>
 
           <mat-select
-            [value]="selectedRobotId()"
-            (selectionChange)="onRobotChange($event.value)"
+            [value]="sortOption()"
+            (selectionChange)="
+              setSort(
+                $event.value
+              )
+            "
           >
-            <mat-option
-              *ngFor="let robot of robots()"
-              [value]="robot.id"
-            >
-              {{ robot.name }}
+            <mat-option value="name_asc">
+              Nome A–Z
+            </mat-option>
+
+            <mat-option value="name_desc">
+              Nome Z–A
+            </mat-option>
+
+            <mat-option value="code_asc">
+              Código crescente
+            </mat-option>
+
+            <mat-option value="code_desc">
+              Código decrescente
             </mat-option>
           </mat-select>
         </mat-form-field>
-
       </div>
     </mat-card-content>
   </mat-card>
 
   <div
     class="loading"
-    *ngIf="loadingOptions() || loadingConfiguration()"
+    *ngIf="loading()"
   >
-    <mat-spinner diameter="42"></mat-spinner>
+    <mat-spinner
+      diameter="42"
+    ></mat-spinner>
   </div>
 
-  <div class="error" *ngIf="errorMessage()">
-    <mat-icon>error_outline</mat-icon>
+  <div
+    class="error"
+    *ngIf="
+      !loading() &&
+      errorMessage()
+    "
+  >
+    <mat-icon>
+      error_outline
+    </mat-icon>
+
     {{ errorMessage() }}
   </div>
 
   <mat-card
-    class="empty-state"
-    *ngIf="
-      !loadingOptions() &&
-      !loadingConfiguration() &&
-      (!selectedCompanyId() || !selectedRobotId())
-    "
+    class="table-card"
+    *ngIf="!loading()"
   >
-    <mat-icon>tune</mat-icon>
+    <div
+      class="table-wrapper"
+      *ngIf="
+        filteredCompanies().length > 0
+      "
+    >
+      <table class="companies-table">
+        <thead>
+          <tr>
+            <th class="code-column">
+              Código
+            </th>
 
-    <h2>Selecione uma empresa e um robô</h2>
+            <th>
+              Nome
+            </th>
 
-    <p>
-      O formulário será montado automaticamente de acordo com
-      os parâmetros definidos no robô.
-    </p>
+            <th class="status-column">
+              Status
+            </th>
+
+            <th class="actions-column">
+              Ações
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="
+              let company
+              of pagedCompanies()
+            "
+          >
+            <td class="company-code">
+              {{ company.code || '—' }}
+            </td>
+
+            <td class="company-name">
+              {{ company.name }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.active]="
+                  company.status ===
+                  'ACTIVE'
+                "
+                [class.inactive]="
+                  company.status ===
+                  'INACTIVE'
+                "
+              >
+                <span
+                  class="status-dot"
+                ></span>
+
+                {{
+                  companyStatusLabel(
+                    company.status
+                  )
+                }}
+              </span>
+            </td>
+
+            <td class="actions-column">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar empresa"
+                (click)="
+                  openEdit(company)
+                "
+              >
+                <mat-icon>
+                  edit
+                </mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="empty-list"
+      *ngIf="
+        filteredCompanies().length === 0
+      "
+    >
+      <mat-icon>
+        business
+      </mat-icon>
+
+      <h2>
+        Nenhuma empresa encontrada
+      </h2>
+
+      <p>
+        Altere os filtros ou cadastre
+        uma nova empresa.
+      </p>
+    </div>
+
+    <mat-paginator
+      *ngIf="
+        filteredCompanies().length > 0
+      "
+      [length]="
+        filteredCompanies().length
+      "
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 25]"
+      showFirstLastButtons
+      (page)="onPage($event)"
+    >
+    </mat-paginator>
   </mat-card>
+</section>
 
-  <mat-card
-    class="config-card"
-    *ngIf="
-      configuration() &&
-      !loadingConfiguration()
-    "
+<div
+  class="editor-backdrop"
+  *ngIf="editorMode()"
+  (click)="closeEditor()"
+>
+  <aside
+    class="editor-panel"
+    (click)="$event.stopPropagation()"
   >
-    <mat-card-header>
-      <mat-card-title>
-        {{ configuration()?.robot?.name }}
-      </mat-card-title>
+    <header class="editor-header">
+      <div>
+        <span class="editor-eyebrow">
+          {{
+            editorMode() === 'create'
+              ? 'Nova empresa'
+              : editingCompany()?.code
+                || 'Empresa'
+          }}
+        </span>
 
-      <mat-card-subtitle>
-        {{ configuration()?.company?.name }}
-      </mat-card-subtitle>
-    </mat-card-header>
+        <h2>
+          {{
+            editorMode() === 'create'
+              ? 'Cadastrar Empresa'
+              : editingCompany()?.name
+          }}
+        </h2>
+      </div>
 
-    <mat-card-content>
-
-      <form
-        class="dynamic-form"
-        [formGroup]="parametersForm"
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Fechar"
+        (click)="closeEditor()"
       >
+        <mat-icon>
+          close
+        </mat-icon>
+      </button>
+    </header>
 
-        <ng-container
-          *ngFor="
-            let field of configuration()?.robot?.schema?.fields
-          "
+    <div class="editor-content">
+      <form
+        [formGroup]="companyForm"
+        class="company-form"
+      >
+        <mat-accordion
+          multi
+          class="company-accordion"
         >
-
-          <mat-checkbox
-            *ngIf="isBoolean(field)"
-            [formControlName]="field.name"
+          <mat-expansion-panel
+            [expanded]="true"
           >
-            {{ fieldLabel(field) }}
-            <span *ngIf="field.required">*</span>
-          </mat-checkbox>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>
+                  business
+                </mat-icon>
 
-          <mat-form-field
-            *ngIf="!isBoolean(field)"
-            appearance="outline"
-          >
-            <mat-label>
-              {{ fieldLabel(field) }}
-            </mat-label>
+                Dados da empresa
+              </mat-panel-title>
+            </mat-expansion-panel-header>
 
-            <input
-              matInput
-              [type]="inputType(field)"
-              [formControlName]="field.name"
-            />
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Código
+                </mat-label>
 
-            <mat-hint *ngIf="field.required">
-              Campo obrigatório
-            </mat-hint>
+                <input
+                  matInput
+                  formControlName="code"
+                />
 
-            <mat-error
+                <mat-error
+                  *ngIf="
+                    companyForm
+                      .get('code')
+                      ?.hasError('required')
+                  "
+                >
+                  Campo obrigatório.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Nome
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="name"
+                />
+
+                <mat-error
+                  *ngIf="
+                    companyForm
+                      .get('name')
+                      ?.hasError('required')
+                  "
+                >
+                  Campo obrigatório.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Pasta Empresa
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="company_folder"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  CNPJ
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="cnpj"
+                />
+
+                <mat-error
+                  *ngIf="
+                    companyForm
+                      .get('cnpj')
+                      ?.hasError('required')
+                  "
+                >
+                  Campo obrigatório.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Inscrição Estadual
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="state_registration"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Regime Tributário
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="tax_regime"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  PIS/PASEP
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="pis_pasep"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Variação Monetária
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="monetary_variation"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Número da Conta
+                </mat-label>
+
+                <input
+                  matInput
+                  formControlName="account_number"
+                />
+              </mat-form-field>
+
+              <div class="checkbox-field">
+                <mat-checkbox
+                  formControlName="simple_national_opt_in"
+                >
+                  Optante pelo Simples Nacional
+                </mat-checkbox>
+              </div>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>
+                  lock
+                </mat-icon>
+
+                Credenciais
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Senha
+                </mat-label>
+
+                <input
+                  matInput
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="access_password"
+                />
+
+                <mat-hint
+                  *ngIf="
+                    editingCompany()
+                      ?.access_password_configured
+                  "
+                >
+                  Já configurada.
+                  Preencha apenas para substituir.
+                </mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  Frase Secreta
+                </mat-label>
+
+                <input
+                  matInput
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="secret_phrase"
+                />
+
+                <mat-hint
+                  *ngIf="
+                    editingCompany()
+                      ?.secret_phrase_configured
+                  "
+                >
+                  Já configurada.
+                  Preencha apenas para substituir.
+                </mat-hint>
+              </mat-form-field>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>
+                  smart_toy
+                </mat-icon>
+
+                Configurações de Robôs
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div
+              class="robot-create-warning"
               *ngIf="
-                parametersForm
-                  .get(field.name)
-                  ?.hasError('required')
+                editorMode() === 'create'
               "
             >
-              Este campo é obrigatório.
-            </mat-error>
-          </mat-form-field>
+              <mat-icon>
+                info
+              </mat-icon>
 
-        </ng-container>
+              <div>
+                <strong>
+                  Salve a empresa primeiro.
+                </strong>
 
-        <div
-          class="no-fields"
-          *ngIf="
-            configuration()?.robot?.schema?.fields?.length === 0
-          "
-        >
-          Este robô não possui parâmetros configurados.
-        </div>
+                <p>
+                  Depois do cadastro,
+                  você poderá configurar
+                  os parâmetros dos robôs.
+                </p>
+              </div>
+            </div>
 
+            <ng-container
+              *ngIf="
+                editorMode() === 'edit'
+              "
+            >
+              <mat-form-field
+                appearance="outline"
+                class="robot-select"
+              >
+                <mat-label>
+                  Robô
+                </mat-label>
+
+                <mat-select
+                  [value]="
+                    selectedRobotId()
+                  "
+                  (selectionChange)="
+                    onRobotChange(
+                      $event.value
+                    )
+                  "
+                >
+                  <mat-option
+                    *ngFor="
+                      let robot
+                      of robots()
+                    "
+                    [value]="robot.id"
+                  >
+                    {{ robot.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div
+                class="configuration-loading"
+                *ngIf="
+                  loadingConfiguration()
+                "
+              >
+                <mat-spinner
+                  diameter="36"
+                ></mat-spinner>
+              </div>
+
+              <div
+                class="robot-empty"
+                *ngIf="
+                  !selectedRobotId() &&
+                  !loadingConfiguration()
+                "
+              >
+                <mat-icon>
+                  tune
+                </mat-icon>
+
+                <p>
+                  Selecione um robô
+                  para visualizar
+                  seus parâmetros.
+                </p>
+              </div>
+
+              <div
+                class="robot-configuration"
+                *ngIf="
+                  configuration() &&
+                  !loadingConfiguration()
+                "
+              >
+                <div class="robot-config-header">
+                  <div>
+                    <strong>
+                      {{
+                        configuration()
+                          ?.robot
+                          ?.name
+                      }}
+                    </strong>
+
+                    <span>
+                      Parâmetros específicos
+                      desta empresa
+                    </span>
+                  </div>
+                </div>
+
+                <form
+                  class="dynamic-form"
+                  [formGroup]="parametersForm"
+                >
+                  <ng-container
+                    *ngFor="
+                      let field
+                      of configuration()
+                        ?.robot
+                        ?.schema
+                        ?.fields
+                    "
+                  >
+                    <mat-checkbox
+                      *ngIf="
+                        isBoolean(field)
+                      "
+                      [formControlName]="
+                        field.name
+                      "
+                    >
+                      {{
+                        fieldLabel(field)
+                      }}
+
+                      <span
+                        *ngIf="
+                          field.required
+                        "
+                      >
+                        *
+                      </span>
+                    </mat-checkbox>
+
+                    <mat-form-field
+                      *ngIf="
+                        !isBoolean(field)
+                      "
+                      appearance="outline"
+                    >
+                      <mat-label>
+                        {{
+                          fieldLabel(field)
+                        }}
+                      </mat-label>
+
+                      <input
+                        matInput
+                        [type]="inputType(field)"
+                        [formControlName]="field.name"
+                      />
+
+                      <mat-hint
+                        *ngIf="field.required"
+                      >
+                        Campo obrigatório
+                      </mat-hint>
+
+                      <mat-error
+                        *ngIf="
+                          parametersForm
+                            .get(field.name)
+                            ?.hasError('required')
+                        "
+                      >
+                        Este campo é obrigatório.
+                      </mat-error>
+                    </mat-form-field>
+                  </ng-container>
+
+                  <div
+                    class="no-fields"
+                    *ngIf="
+                      configuration()
+                        ?.robot
+                        ?.schema
+                        ?.fields
+                        ?.length === 0
+                    "
+                  >
+                    Este robô não possui
+                    parâmetros configurados.
+                  </div>
+                </form>
+
+                <div class="robot-config-actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    [disabled]="
+                      savingConfiguration() ||
+                      parametersForm.invalid
+                    "
+                    (click)="
+                      saveRobotConfiguration()
+                    "
+                  >
+                    <mat-icon>
+                      save
+                    </mat-icon>
+
+                    {{
+                      savingConfiguration()
+                        ? 'Salvando...'
+                        : 'Salvar Configuração'
+                    }}
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+          </mat-expansion-panel>
+        </mat-accordion>
       </form>
+    </div>
 
-    </mat-card-content>
+    <footer class="editor-footer">
+      <button
+        *ngIf="
+          editorMode() === 'edit'
+        "
+        mat-stroked-button
+        type="button"
+        class="status-action"
+        [class.activate]="
+          editingCompany()?.status ===
+          'INACTIVE'
+        "
+        (click)="
+          toggleCurrentCompanyStatus()
+        "
+      >
+        <mat-icon>
+          {{
+            editingCompany()?.status ===
+            'ACTIVE'
+              ? 'block'
+              : 'check_circle'
+          }}
+        </mat-icon>
 
-    <mat-card-actions align="end">
+        {{
+          editingCompany()?.status ===
+          'ACTIVE'
+            ? 'Desativar Empresa'
+            : 'Ativar Empresa'
+        }}
+      </button>
+
+      <div class="footer-spacer"></div>
+
+      <button
+        mat-button
+        type="button"
+        (click)="closeEditor()"
+      >
+        Cancelar
+      </button>
+
       <button
         mat-flat-button
         color="primary"
         type="button"
-        (click)="save()"
-        [disabled]="
-          saving() ||
-          parametersForm.invalid
-        "
+        [disabled]="savingCompany()"
+        (click)="saveCompany()"
       >
-        <mat-icon>save</mat-icon>
+        <mat-icon>
+          save
+        </mat-icon>
 
-        {{ saving() ? 'Salvando...' : 'Salvar Configurações' }}
+        {{
+          savingCompany()
+            ? 'Salvando...'
+            : editorMode() === 'create'
+              ? 'Cadastrar'
+              : 'Salvar'
+        }}
       </button>
-    </mat-card-actions>
-
-  </mat-card>
-</section>
+    </footer>
+  </aside>
+</div>
