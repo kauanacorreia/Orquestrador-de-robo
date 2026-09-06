@@ -6,7 +6,6 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AuthService {
-
   private readonly supabase: SupabaseClient;
 
   constructor() {
@@ -29,5 +28,11 @@ export class AuthService {
 
   async getSession() {
     return await this.supabase.auth.getSession();
+  }
+
+  async getCurrentUserId(): Promise<string | null> {
+    const { data } = await this.supabase.auth.getSession();
+
+    return data.session?.user?.id ?? null;
   }
 }
