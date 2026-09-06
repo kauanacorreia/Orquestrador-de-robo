@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_015007) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_034000) do
   create_schema "extensions"
 
   # These are extensions that must be enabled in order to support this database
@@ -82,10 +82,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_015007) do
 
   create_table "public.profiles", id: :uuid, default: nil, force: :cascade do |t|
     t.timestamptz "created_at", default: -> { "now()" }, null: false
+    t.text "email"
     t.timestamptz "last_login"
+    t.datetime "last_login_at"
     t.text "name", null: false
-    t.text "role", default: "VIEWER", null: false
-    t.check_constraint "role = ANY (ARRAY['ADMIN'::text, 'MANAGER'::text, 'VIEWER'::text])", name: "profiles_role_check"
+    t.text "role", default: "OPERATOR", null: false
+    t.text "status", default: "ACTIVE", null: false
+    t.index ["email"], name: "index_profiles_on_email", unique: true
+    t.index ["status"], name: "index_profiles_on_status"
+    t.check_constraint "role = ANY (ARRAY['ADMIN'::text, 'OPERATOR'::text])", name: "profiles_role_check"
+    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "profiles_status_check"
   end
 
   create_table "public.robot_edit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
