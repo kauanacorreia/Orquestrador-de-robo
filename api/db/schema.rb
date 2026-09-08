@@ -10,17 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_05_223256) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_034000) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "companies", id: :string, force: :cascade do |t|
+    t.text "access_password"
+    t.text "account_number"
     t.string "cnpj", null: false
+    t.text "code"
+    t.text "company_folder"
     t.datetime "created_at", null: false
     t.string "email"
+    t.text "monetary_variation"
     t.string "name", null: false
     t.string "phone"
+    t.text "pis_pasep"
+    t.text "secret_phrase"
+    t.boolean "simple_national_opt_in", default: false, null: false
     t.string "status", default: "active", null: false
+    t.text "tax_regime"
     t.string "trade_name"
     t.datetime "updated_at", null: false
     t.index ["cnpj"], name: "index_companies_on_cnpj", unique: true
+    t.index ["code"], name: "index_companies_on_code", unique: true
   end
 
   create_table "executions", id: :string, force: :cascade do |t|
@@ -54,10 +67,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_223256) do
 
   create_table "profiles", id: :string, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.text "email"
     t.datetime "last_login"
+    t.datetime "last_login_at"
     t.string "name"
-    t.string "role"
+    t.string "role", default: "OPERATOR"
+    t.text "status", default: "ACTIVE", null: false
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_profiles_on_email", unique: true
+    t.index ["status"], name: "index_profiles_on_status"
+    t.check_constraint "role::text = ANY (ARRAY['ADMIN'::character varying, 'OPERATOR'::character varying]::text[])", name: "profiles_role_check"
+    t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "profiles_status_check"
+  end
+
+  create_table "robot_edit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "field_name", null: false
+    t.text "new_value"
+    t.text "old_value"
+    t.bigint "robot_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id"
+    t.index ["robot_id"], name: "index_robot_edit_logs_on_robot_id"
   end
 
   create_table "robot_versions", force: :cascade do |t|
@@ -73,6 +104,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_223256) do
   create_table "robots", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "current_version", default: 1, null: false
+    t.text "department"
     t.text "description"
     t.string "name", null: false
     t.json "schema"
@@ -101,6 +133,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_05_223256) do
   add_foreign_key "executions", "companies"
   add_foreign_key "executions", "schedules"
   add_foreign_key "log_entries", "executions"
+  add_foreign_key "robot_edit_logs", "robots"
   add_foreign_key "robot_versions", "robots"
   add_foreign_key "schedules", "companies"
 end

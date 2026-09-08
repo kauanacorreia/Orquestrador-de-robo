@@ -3,13 +3,15 @@ class AddAccessControlFieldsToProfiles < ActiveRecord::Migration[8.1]
     add_column :profiles, :email, :text
     add_column :profiles, :last_login_at, :datetime
 
-    execute <<~SQL
-      UPDATE profiles AS profiles
-      SET email = users.email
-      FROM auth.users AS users
-      WHERE profiles.id = users.id
-        AND profiles.email IS NULL;
-    SQL
+    if auth_users_table_exists?
+      execute <<~SQL
+        UPDATE profiles AS profiles
+        SET email = users.email
+        FROM auth.users AS users
+        WHERE profiles.id = users.id
+          AND profiles.email IS NULL;
+      SQL
+    end
 
     execute <<~SQL
       UPDATE profiles
@@ -19,10 +21,9 @@ class AddAccessControlFieldsToProfiles < ActiveRecord::Migration[8.1]
 
     change_column_default :profiles, :role, "OPERATOR"
 
-    remove_check_constraint(
-      :profiles,
-      name: "profiles_role_check"
-    )
+    if check_constraint_exists?(:profiles, name: "profiles_role_check")
+      remove_check_constraint(:profiles, name: "profiles_role_check")
+    end
 
     add_check_constraint(
       :profiles,
@@ -36,10 +37,9 @@ class AddAccessControlFieldsToProfiles < ActiveRecord::Migration[8.1]
   def down
     remove_index :profiles, :email
 
-    remove_check_constraint(
-      :profiles,
-      name: "profiles_role_check"
-    )
+    if check_constraint_exists?(:profiles, name: "profiles_role_check")
+      remove_check_constraint(:profiles, name: "profiles_role_check")
+    end
 
     execute <<~SQL
       UPDATE profiles
@@ -57,5 +57,16 @@ class AddAccessControlFieldsToProfiles < ActiveRecord::Migration[8.1]
 
     remove_column :profiles, :last_login_at
     remove_column :profiles, :email
+  end
+
+  private
+
+  def auth_users_table_exists?
+    connection.select_value(<<~SQL)
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'auth' AND table_name = 'users'
+      )
+    SQL
   end
 end
