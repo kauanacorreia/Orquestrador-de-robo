@@ -10,13 +10,9 @@ default: &default
   timeout: 5000
 
 development:
-  adapter: postgresql
-  encoding: unicode
-  database: orquestrador_de_robo_development
-  host: localhost
-  username: postgres
-  password: postgres
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  primary:
+    adapter: postgresql
+    url: <%= ENV['DATABASE_URL'] %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
