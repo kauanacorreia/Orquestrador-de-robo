@@ -18,6 +18,8 @@ export interface Company extends CompanyOption {
   account_number: string | null;
   notification_email: string | null;
 
+  robots_count: number;
+
   access_password_configured: boolean;
   secret_phrase_configured: boolean;
 

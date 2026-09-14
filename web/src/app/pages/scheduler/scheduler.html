@@ -1,0 +1,171 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Agendador de Tarefas</h1>
+
+      <p>
+        Programe a execução automática dos robôs por empresa.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openCreate()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo Agendamento
+    </button>
+  </header>
+
+  <div class="loading" *ngIf="loading()">
+    <mat-spinner diameter="42"></mat-spinner>
+  </div>
+
+  <div class="error" *ngIf="!loading() && errorMessage()">
+    <mat-icon>error_outline</mat-icon>
+    {{ errorMessage() }}
+  </div>
+
+  <mat-card class="table-card" *ngIf="!loading() && !errorMessage()">
+    <div class="table-wrapper" *ngIf="sortedSchedules().length > 0">
+      <table class="schedules-table">
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Robô</th>
+            <th>Recorrência</th>
+            <th class="next-run-column">Próxima Execução</th>
+            <th class="status-column">Status</th>
+            <th class="actions-column">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let schedule of sortedSchedules()">
+            <td class="company-name">{{ schedule.company_name }}</td>
+            <td>{{ schedule.robot_name }}</td>
+            <td>{{ schedule.cron_description }}</td>
+            <td>{{ formatNextExecution(schedule.next_execution) }}</td>
+
+            <td class="status-column">
+              <mat-slide-toggle
+                [checked]="schedule.status === 'ACTIVE'"
+                [disabled]="togglingId() === schedule.id"
+                [matTooltip]="statusLabel(schedule.status)"
+                (change)="toggleStatus(schedule)"
+              >
+                {{ statusLabel(schedule.status) }}
+              </mat-slide-toggle>
+            </td>
+
+            <td class="actions-column">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar agendamento"
+                (click)="openEdit(schedule)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Executar Agora"
+                [disabled]="runningId() === schedule.id"
+                (click)="runNow(schedule)"
+              >
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-list" *ngIf="sortedSchedules().length === 0">
+      <mat-icon>event_repeat</mat-icon>
+      <h2>Nenhum agendamento cadastrado</h2>
+      <p>Clique em "Novo Agendamento" para criar o primeiro.</p>
+    </div>
+  </mat-card>
+</section>
+
+<div class="editor-backdrop" *ngIf="editorMode()" (click)="closeEditor()">
+  <aside class="editor-panel" (click)="$event.stopPropagation()">
+    <header class="editor-header">
+      <div>
+        <span class="editor-eyebrow">
+          {{ editorMode() === 'create' ? 'Novo' : 'Editar' }}
+        </span>
+        <h2>Agendamento</h2>
+      </div>
+
+      <button mat-icon-button type="button" matTooltip="Fechar" (click)="closeEditor()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="editor-content">
+      <form [formGroup]="scheduleForm" class="schedule-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Empresa</mat-label>
+          <mat-select formControlName="company_id">
+            <mat-option *ngFor="let company of companies()" [value]="company.id">
+              {{ company.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Robô</mat-label>
+          <mat-select formControlName="robot_id">
+            <mat-option *ngFor="let robot of robots()" [value]="robot.id">
+              {{ robot.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="weekdays-field">
+          <span class="weekdays-label">Dias da semana</span>
+          <span class="weekdays-hint">Nenhum dia marcado = todos os dias</span>
+
+          <div class="weekdays-options">
+            <mat-checkbox
+              *ngFor="let day of weekdays"
+              [checked]="isDaySelected(day.value)"
+              (change)="toggleDay(day.value)"
+            >
+              {{ day.label }}
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Horário</mat-label>
+          <input matInput type="time" formControlName="time" />
+        </mat-form-field>
+      </form>
+    </div>
+
+    <footer class="editor-footer">
+      <div class="footer-spacer"></div>
+
+      <button mat-stroked-button type="button" (click)="closeEditor()">
+        Cancelar
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="savingSchedule()"
+        (click)="saveSchedule()"
+      >
+        Salvar
+      </button>
+    </footer>
+  </aside>
+</div>

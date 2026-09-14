@@ -1,0 +1,193 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Histórico de Execuções</h1>
+
+      <p>
+        Acompanhe as execuções dos robôs e consulte os logs de cada uma.
+      </p>
+    </div>
+  </header>
+
+  <mat-card class="toolbar-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline">
+          <mat-label>Empresa</mat-label>
+          <mat-select
+            [value]="companyFilter()"
+            (selectionChange)="setCompanyFilter($event.value)"
+          >
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let company of companies()" [value]="company.id">
+              {{ company.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Robô</mat-label>
+          <mat-select
+            [value]="robotFilter()"
+            (selectionChange)="setRobotFilter($event.value)"
+          >
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let robot of robots()" [value]="robot.id">
+              {{ robot.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [value]="statusFilter()"
+            (selectionChange)="setStatusFilter($event.value)"
+          >
+            <mat-option value="ALL">Todos</mat-option>
+            <mat-option value="PENDING">Pendente</mat-option>
+            <mat-option value="RUNNING">Em execução</mat-option>
+            <mat-option value="SUCCESS">Sucesso</mat-option>
+            <mat-option value="FAILED">Falhou</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="loading" *ngIf="loading()">
+    <mat-spinner diameter="42"></mat-spinner>
+  </div>
+
+  <div class="error" *ngIf="!loading() && errorMessage()">
+    <mat-icon>error_outline</mat-icon>
+    {{ errorMessage() }}
+  </div>
+
+  <mat-card class="table-card" *ngIf="!loading() && !errorMessage()">
+    <div class="table-wrapper" *ngIf="executions().length > 0">
+      <table class="executions-table">
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Robô</th>
+            <th class="status-column">Status</th>
+            <th>Início</th>
+            <th>Duração</th>
+            <th class="trigger-column">Disparado por</th>
+            <th class="actions-column">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let execution of executions()">
+            <td class="company-name">{{ execution.company_name }}</td>
+            <td>{{ execution.robot_name }}</td>
+
+            <td class="status-column">
+              <span
+                class="status-badge"
+                [class.success]="execution.status === 'SUCCESS'"
+                [class.failed]="execution.status === 'FAILED'"
+                [class.running]="execution.status === 'RUNNING'"
+                [class.pending]="execution.status === 'PENDING'"
+              >
+                <span class="status-dot"></span>
+                {{ statusLabel(execution.status) }}
+              </span>
+            </td>
+
+            <td>{{ formatDate(execution.started_at) }}</td>
+            <td>{{ formatDuration(execution.duration_ms) }}</td>
+            <td class="trigger-column">{{ triggeredByLabel(execution) }}</td>
+
+            <td class="actions-column">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Ver logs"
+                (click)="openLogs(execution)"
+              >
+                <mat-icon>article</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-list" *ngIf="executions().length === 0">
+      <mat-icon>history</mat-icon>
+      <h2>Nenhuma execução encontrada</h2>
+      <p>Altere os filtros ou aguarde a próxima execução.</p>
+    </div>
+
+    <mat-paginator
+      *ngIf="total() > 0"
+      [length]="total()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 25, 50]"
+      showFirstLastButtons
+      (page)="onPage($event)"
+    >
+    </mat-paginator>
+  </mat-card>
+</section>
+
+<div class="editor-backdrop" *ngIf="logsPanelOpen()" (click)="closeLogs()">
+  <aside class="editor-panel" (click)="$event.stopPropagation()">
+    <header class="editor-header">
+      <div>
+        <span class="editor-eyebrow">Execução</span>
+        <h2>{{ selectedExecution()?.robot_name }}</h2>
+      </div>
+
+      <button mat-icon-button type="button" matTooltip="Fechar" (click)="closeLogs()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="editor-content">
+      <div class="execution-summary" *ngIf="selectedExecution() as execution">
+        <div>
+          <span class="summary-label">Empresa</span>
+          <span>{{ execution.company_name }}</span>
+        </div>
+
+        <div>
+          <span class="summary-label">Status</span>
+          <span>{{ statusLabel(execution.status) }}</span>
+        </div>
+
+        <div *ngIf="execution.error_message">
+          <span class="summary-label">Erro</span>
+          <span>{{ execution.error_message }}</span>
+        </div>
+      </div>
+
+      <div class="logs-loading" *ngIf="loadingLogs()">
+        <mat-spinner diameter="36"></mat-spinner>
+      </div>
+
+      <ul class="log-list" *ngIf="!loadingLogs()">
+        <li
+          *ngFor="let log of logs()"
+          class="log-entry"
+          [class.log-error]="log.level === 'ERROR'"
+          [class.log-warning]="log.level === 'WARNING'"
+          [class.log-info]="log.level === 'INFO'"
+          [class.log-debug]="log.level === 'DEBUG'"
+        >
+          <span class="log-level">{{ log.level }}</span>
+          <span class="log-time">{{ formatDate(log.created_at) }}</span>
+          <span class="log-message">{{ log.message }}</span>
+        </li>
+
+        <li class="log-empty" *ngIf="logs().length === 0">
+          Nenhum log registrado para esta execução.
+        </li>
+      </ul>
+    </div>
+  </aside>
+</div>

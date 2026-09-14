@@ -1,0 +1,482 @@
+.page {
+  width: 100%;
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 32px;
+
+  box-sizing: border-box;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 5px;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    color: #111827;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+  }
+}
+
+.toolbar-card {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  margin-bottom: 22px;
+}
+
+.toolbar-card mat-card-content {
+  padding: 20px;
+}
+
+.toolbar {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+
+  gap: 18px;
+
+  mat-form-field {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.loading {
+  min-height: 300px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 14px 18px;
+
+  border-radius: 10px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.table-card {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.executions-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 16px 22px;
+
+    text-align: left;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    background: #fff;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #fafafa;
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+}
+
+.status-column {
+  width: 150px;
+}
+
+.trigger-column {
+  width: 130px;
+}
+
+.actions-column {
+  width: 80px;
+
+  text-align: center !important;
+}
+
+.company-name {
+  font-weight: 600;
+
+  color: #111827;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 6px 11px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  background: #f3f4f6;
+  color: #4b5563;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 8px;
+
+    border-radius: 50%;
+
+    background: #9ca3af;
+  }
+
+  &.success {
+    background: #ecfdf5;
+    color: #047857;
+
+    .status-dot {
+      background: #10b981;
+    }
+  }
+
+  &.failed {
+    background: #fef2f2;
+    color: #b91c1c;
+
+    .status-dot {
+      background: #ef4444;
+    }
+  }
+
+  &.running {
+    background: #eff6ff;
+    color: #1d4ed8;
+
+    .status-dot {
+      background: #3b82f6;
+    }
+  }
+
+  &.pending {
+    background: #fffbeb;
+    color: #b45309;
+
+    .status-dot {
+      background: #f59e0b;
+    }
+  }
+}
+
+.empty-list {
+  min-height: 320px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 32px;
+
+  mat-icon {
+    width: 52px;
+    height: 52px;
+
+    font-size: 52px;
+
+    color: #9ca3af;
+
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    margin: 0 0 6px;
+
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+  }
+}
+
+/* =========================
+   PAINEL DE LOGS
+   ========================= */
+
+.editor-backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  justify-content: flex-end;
+
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.editor-panel {
+  width: min(560px, 92vw);
+  height: 100%;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f8fafc;
+
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.18);
+}
+
+.editor-header {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 22px 26px;
+
+  background: #fff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  h2 {
+    margin: 3px 0 0;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    color: #111827;
+  }
+}
+
+.editor-eyebrow {
+  display: block;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #6b7280;
+
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editor-content {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding: 22px;
+}
+
+.execution-summary {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.summary-label {
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #9ca3af;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.logs-loading {
+  min-height: 160px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.log-list {
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.log-entry {
+  display: grid;
+
+  grid-template-columns: 70px 150px 1fr;
+
+  gap: 10px;
+
+  align-items: start;
+
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background: #fff;
+
+  border: 1px solid #e5e7eb;
+
+  font-size: 13px;
+}
+
+.log-level {
+  font-weight: 700;
+}
+
+.log-time {
+  color: #6b7280;
+
+  white-space: nowrap;
+}
+
+.log-message {
+  overflow-wrap: anywhere;
+}
+
+.log-info .log-level {
+  color: #1d4ed8;
+}
+
+.log-warning .log-level {
+  color: #b45309;
+}
+
+.log-error .log-level {
+  color: #b91c1c;
+}
+
+.log-debug .log-level {
+  color: #6b7280;
+}
+
+.log-empty {
+  padding: 20px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+@media (max-width: 950px) {
+  .toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 20px;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .executions-table {
+    min-width: 720px;
+  }
+
+  .editor-panel {
+    width: 100%;
+  }
+
+  .editor-content {
+    padding: 14px;
+  }
+
+  .editor-header {
+    padding: 18px;
+  }
+
+  .log-entry {
+    grid-template-columns: 1fr;
+  }
+}

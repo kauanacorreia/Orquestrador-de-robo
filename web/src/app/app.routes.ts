@@ -65,6 +65,28 @@ export const routes: Routes = [
             module =>
               module.AccessControl
           )
+      },
+
+      {
+        path: 'agendamentos',
+        loadComponent: () =>
+          import(
+            './pages/scheduler/scheduler'
+          ).then(
+            module =>
+              module.Scheduler
+          )
+      },
+
+      {
+        path: 'historico',
+        loadComponent: () =>
+          import(
+            './pages/execution-history/execution-history'
+          ).then(
+            module =>
+              module.ExecutionHistory
+          )
       }
     ]
   }

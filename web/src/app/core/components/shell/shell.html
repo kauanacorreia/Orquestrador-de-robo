@@ -111,6 +111,40 @@
         </span>
       </a>
 
+      <a
+        routerLink="/agendamentos"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Agendador'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>event_repeat</mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Agendador
+        </span>
+      </a>
+
+      <a
+        routerLink="/historico"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Histórico de Execuções'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>history</mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Histórico de Execuções
+        </span>
+      </a>
+
     </nav>
 
     <div class="sidebar-footer">
