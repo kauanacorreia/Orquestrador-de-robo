@@ -95,6 +95,7 @@ module Api
           account_number: company.account_number,
           notification_email: company.notification_email,
           status: company.status,
+          robots_count: company.company_robot_configs.count,
 
           # Nunca devolvemos as credenciais reais para o Angular.
           access_password_configured: company.access_password.present?,

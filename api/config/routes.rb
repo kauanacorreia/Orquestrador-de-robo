@@ -34,6 +34,28 @@ Rails.application.routes.draw do
     get "dashboard/filter_options",
         to: "dashboard#filter_options"
 
+    resources :executions,
+              only: [
+                :index,
+                :show
+              ] do
+      member do
+        get :logs
+      end
+    end
+
+    resources :schedules,
+              only: [
+                :index,
+                :create,
+                :update
+              ] do
+      member do
+        patch :toggle_status
+        post :run_now
+      end
+    end
+
     namespace :v1 do
       resources :companies,
                 only: [
