@@ -65,8 +65,9 @@ describe('KpiCard', () => {
     expect(element.querySelector('.kpi-card__subtitle')?.textContent).toContain('Últimos 7 dias');
   });
 
-  it('shows the raw value first and the secondary value muted by default', () => {
+  it('shows the raw value first and the secondary (rate) value muted below, always', () => {
     fixture.componentRef.setInput('value', 1180);
+    fixture.componentRef.setInput('rateLabel', 'Taxa de sucesso');
     fixture.componentRef.setInput('secondaryValue', '94,4%');
     fixture.detectChanges();
 
@@ -75,19 +76,29 @@ describe('KpiCard', () => {
     expect(values[0].textContent).toContain('1180');
     expect(values[1].textContent).toContain('94,4%');
     expect(values[1].classList).toContain('kpi-card__value--muted');
+
+    expect(fixture.nativeElement.querySelector('.kpi-card__rate-label')?.textContent).toContain(
+      'Taxa de sucesso',
+    );
   });
 
-  it('emphasizes the secondary value when emphasis is set to secondaryValue', () => {
-    fixture.componentRef.setInput('value', 70);
-    fixture.componentRef.setInput('secondaryValue', '5,6%');
-    fixture.componentRef.setInput('emphasis', 'secondaryValue');
+  it('renders the unit label under the value when provided', () => {
+    fixture.componentRef.setInput('unitLabel', 'finalizadas com êxito');
     fixture.detectChanges();
 
-    const values = fixture.nativeElement.querySelectorAll('.kpi-card__value');
+    const element: HTMLElement = fixture.nativeElement;
 
-    expect(values[0].textContent).toContain('5,6%');
-    expect(values[0].classList).toContain('kpi-card__value--emphasis');
-    expect(values[1].textContent).toContain('70');
-    expect(values[1].classList).toContain('kpi-card__value--muted');
+    expect(element.querySelector('.kpi-card__unit')?.textContent).toContain('finalizadas com êxito');
+  });
+
+  it('shows the tooltip icon only when a tooltip is provided', () => {
+    let element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('.kpi-card__info')).toBeFalsy();
+
+    fixture.componentRef.setInput('tooltip', 'Descrição do KPI para acessibilidade.');
+    fixture.detectChanges();
+
+    element = fixture.nativeElement;
+    expect(element.querySelector('.kpi-card__info')).toBeTruthy();
   });
 });

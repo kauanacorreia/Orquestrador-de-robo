@@ -17,6 +17,7 @@ const summary: DashboardSummary = {
   activeRobots: 4,
   activeUsers: 1,
   clients: 2,
+  criticalRobot: null,
 };
 
 const volumetria: VolumetriaPoint[] = [

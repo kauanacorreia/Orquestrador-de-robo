@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { DashboardFilters } from '../../models/dashboard.model';
@@ -15,6 +16,7 @@ describe('DashboardFiltersPanel', () => {
 
     await TestBed.configureTestingModule({
       imports: [DashboardFiltersPanel, NoopAnimationsModule],
+      providers: [provideNativeDateAdapter()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardFiltersPanel);
@@ -37,6 +39,18 @@ describe('DashboardFiltersPanel', () => {
     expect(emitted[0].startDate).not.toBe(filters.startDate);
   });
 
+  it('marks the period as custom when the user edits the range directly', () => {
+    const emitted: DashboardFilters[] = [];
+    component.filtersChange.subscribe((value) => emitted.push(value));
+
+    component.rangeForm.setValue({ start: new Date(2026, 7, 1), end: new Date(2026, 7, 10) });
+    component.onRangeChange();
+
+    expect(emitted[0].periodPreset).toBe('custom');
+    expect(emitted[0].startDate).toBe('2026-08-01');
+    expect(emitted[0].endDate).toBe('2026-08-10');
+  });
+
   it('emits the selected robot ids', () => {
     const emitted: DashboardFilters[] = [];
     component.filtersChange.subscribe((value) => emitted.push(value));
@@ -54,6 +68,6 @@ describe('DashboardFiltersPanel', () => {
     component.clearFilters();
 
     expect(emitted[1].statuses).toEqual([]);
-    expect(emitted[1].periodPreset).toBe('7d');
+    expect(emitted[1].periodPreset).toBe('custom');
   });
 });

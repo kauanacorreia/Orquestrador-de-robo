@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule, MatDateRangePicker } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 import {
@@ -12,17 +12,21 @@ import {
   PeriodPreset,
 } from '../../models/dashboard.model';
 import { defaultDashboardFilters, resolvePeriodRange } from '../../utils/period.util';
+import {
+  AutocompleteOption,
+  MultiAutocompleteField,
+} from '../multi-autocomplete-field/multi-autocomplete-field';
 
 interface Option<T> {
   value: T;
   label: string;
 }
 
-const PERIOD_PRESETS: Option<PeriodPreset>[] = [
+// Atalhos de "tempo fixo" oferecidos dentro do próprio calendário.
+const QUICK_PRESETS: Option<PeriodPreset>[] = [
   { value: 'today', label: 'Hoje' },
   { value: '7d', label: 'Últimos 7 dias' },
   { value: '30d', label: 'Últimos 30 dias' },
-  { value: 'custom', label: 'Personalizado' },
 ];
 
 const STATUS_OPTIONS: Option<ActivityLogStatus>[] = [
@@ -31,22 +35,80 @@ const STATUS_OPTIONS: Option<ActivityLogStatus>[] = [
   { value: 'failure', label: 'Falha' },
 ];
 
+function toDate(isoDate: string | null | undefined): Date | null {
+  if (!isoDate) {
+    return null;
+  }
+
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 @Component({
   selector: 'app-dashboard-filters',
-  imports: [FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule, MatButtonModule],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MultiAutocompleteField,
+  ],
   templateUrl: './dashboard-filters.html',
   styleUrl: './dashboard-filters.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardFiltersPanel {
+export class DashboardFiltersPanel implements OnChanges {
   @Input({ required: true }) filters!: DashboardFilters;
   @Input() filterOptions: DashboardFilterOptions | null = null;
   @Output() filtersChange = new EventEmitter<DashboardFilters>();
 
-  readonly periodPresets = PERIOD_PRESETS;
+  readonly quickPresets = QUICK_PRESETS;
   readonly statusOptions = STATUS_OPTIONS;
 
-  onPeriodPresetChange(preset: PeriodPreset): void {
+  // Calendário de período: sempre aparece já como o range atual (o filtro
+  // abre "personalizado" por padrão — ver defaultDashboardFilters).
+  readonly rangeForm = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
+
+  robotOptions(): AutocompleteOption[] {
+    return (this.filterOptions?.robots ?? []).map((robot) => ({ id: robot.id, name: robot.name }));
+  }
+
+  clientOptions(): AutocompleteOption[] {
+    return (this.filterOptions?.clients ?? []).map((client) => ({ id: client.id, name: client.name }));
+  }
+
+  userOptions(): AutocompleteOption[] {
+    return (this.filterOptions?.users ?? []).map((user) => ({ id: user.id, name: user.name }));
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filters']) {
+      this.syncRangeForm();
+    }
+  }
+
+  private syncRangeForm(): void {
+    this.rangeForm.setValue(
+      { start: toDate(this.filters.startDate), end: toDate(this.filters.endDate) },
+      { emitEvent: false },
+    );
+  }
+
+  // Atalho de tempo fixo clicado dentro do calendário: aplica o range e
+  // fecha o popup.
+  onPeriodPresetChange(preset: PeriodPreset, picker?: MatDateRangePicker<Date>): void {
     if (preset === 'custom') {
       this.emit({ ...this.filters, periodPreset: preset });
       return;
@@ -54,20 +116,24 @@ export class DashboardFiltersPanel {
 
     const { startDate, endDate } = resolvePeriodRange(preset, new Date());
     this.emit({ ...this.filters, periodPreset: preset, startDate, endDate });
+
+    picker?.close();
   }
 
-  onCustomStartChange(value: string): void {
-    if (!value) {
-      return;
-    }
-    this.emit({ ...this.filters, periodPreset: 'custom', startDate: value });
-  }
+  // Usuário editou o range diretamente no calendário: vira "personalizado".
+  onRangeChange(): void {
+    const { start, end } = this.rangeForm.getRawValue();
 
-  onCustomEndChange(value: string): void {
-    if (!value) {
+    if (!start || !end) {
       return;
     }
-    this.emit({ ...this.filters, periodPreset: 'custom', endDate: value });
+
+    this.emit({
+      ...this.filters,
+      periodPreset: 'custom',
+      startDate: toIsoDate(start),
+      endDate: toIsoDate(end),
+    });
   }
 
   onRobotsChange(robotIds: string[]): void {

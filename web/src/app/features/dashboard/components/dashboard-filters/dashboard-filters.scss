@@ -9,12 +9,23 @@
     flex: 1 1 180px;
   }
 
-  &__field--date {
-    min-width: 160px;
-    flex: 0 1 160px;
+  &__field--date-range {
+    min-width: 260px;
+    flex: 0 1 260px;
   }
 
   &__clear {
     margin-top: 8px;
   }
+}
+
+// Conteúdo projetado dentro do popup do calendário (mat-datepicker-actions).
+.dashboard-filters__quick-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dashboard-filters__spacer {
+  flex: 1;
 }

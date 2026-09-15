@@ -30,12 +30,17 @@ module Api
 
         active_robots: Robot.where(status: "ACTIVE").count,
 
+        # Bug: o login e registrado em last_login_at (ver
+        # Api::V1::UsersController#record_login); last_login nunca e
+        # preenchido, entao esse KPI sempre dava 0.
         active_users: Profile.where(
-          "last_login >= ?",
+          "last_login_at >= ?",
           24.hours.ago
         ).count,
 
-        clients: Company.count
+        clients: Company.count,
+
+        critical_robot: critical_robot_stats
       }
     end
 
@@ -161,6 +166,40 @@ module Api
       return 0 if total.zero?
 
       ((value.to_f / total) * 100).round(2)
+    end
+
+    # KPI "Robô mais crítico": dentro do periodo/filtros atuais, o robo com
+    # mais execucoes com falha (desempate pela maior taxa de erro). Retorna
+    # nil se nenhum robo teve falha no periodo.
+    def critical_robot_stats
+      totals = Hash.new(0)
+      failures = Hash.new(0)
+
+      filtered_executions
+        .group(:robot_id, :status)
+        .count
+        .each do |(robot_id, status), count|
+          totals[robot_id] += count
+          failures[robot_id] += count if status == "FAILED"
+        end
+
+      robot_id = failures
+        .select { |_id, count| count.positive? }
+        .keys
+        .max_by { |id| [failures[id], failures[id].to_f / totals[id]] }
+
+      return nil unless robot_id
+
+      total = totals[robot_id]
+      errors = failures[robot_id]
+
+      {
+        robot_id: robot_id,
+        robot_name: Robot.find_by(id: robot_id)&.name,
+        total_executions: total,
+        errors: errors,
+        error_rate: percentage(errors, total)
+      }
     end
   end
 end

@@ -1,0 +1,30 @@
+<mat-form-field appearance="outline" class="multi-autocomplete-field">
+  <mat-label>{{ label }}</mat-label>
+
+  <mat-chip-grid #chipGrid [attr.aria-label]="label + ' selecionados'">
+    @for (option of selectedOptions; track option.id) {
+      <mat-chip-row (removed)="remove(option.id)">
+        {{ option.name }}
+        <button matChipRemove type="button" [attr.aria-label]="'Remover ' + option.name">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+    }
+
+    <input
+      #searchInput
+      [matChipInputFor]="chipGrid"
+      [matAutocomplete]="auto"
+      [placeholder]="selectedOptions.length === 0 ? 'Clique ou digite para buscar' : ''"
+      (input)="onInput(searchInput.value)"
+    />
+  </mat-chip-grid>
+
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="select($event)">
+    @for (option of filteredOptions; track option.id) {
+      <mat-option [value]="option.id">{{ option.name }}</mat-option>
+    } @empty {
+      <mat-option disabled>Nenhum resultado</mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

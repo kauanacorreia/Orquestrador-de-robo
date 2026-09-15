@@ -1,0 +1,21 @@
+.multi-autocomplete-field {
+  width: 100%;
+
+  mat-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  input {
+    flex: 1 1 80px;
+    min-width: 80px;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font: inherit;
+  }
+}

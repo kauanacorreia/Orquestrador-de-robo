@@ -1,76 +1,60 @@
 <div class="dashboard-filters">
-  <mat-form-field appearance="outline" class="dashboard-filters__field">
+  <mat-form-field appearance="outline" class="dashboard-filters__field dashboard-filters__field--date-range">
     <mat-label>Período</mat-label>
-    <mat-select
-      [ngModel]="filters.periodPreset"
-      (ngModelChange)="onPeriodPresetChange($event)"
-    >
-      @for (preset of periodPresets; track preset.value) {
-        <mat-option [value]="preset.value">{{ preset.label }}</mat-option>
-      }
-    </mat-select>
+
+    <mat-date-range-input [rangePicker]="picker" [formGroup]="rangeForm">
+      <input matStartDate formControlName="start" placeholder="Início" (dateChange)="onRangeChange()" />
+      <input matEndDate formControlName="end" placeholder="Fim" (dateChange)="onRangeChange()" />
+    </mat-date-range-input>
+
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+
+    <mat-date-range-picker #picker>
+      <mat-datepicker-actions>
+        <div class="dashboard-filters__quick-presets">
+          @for (preset of quickPresets; track preset.value) {
+            <button
+              mat-stroked-button
+              type="button"
+              class="dashboard-filters__quick-preset"
+              (click)="onPeriodPresetChange(preset.value, picker)"
+            >
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+
+        <span class="dashboard-filters__spacer"></span>
+
+        <button mat-button matDatepickerCancel type="button">Cancelar</button>
+        <button mat-flat-button color="primary" matDatepickerApply type="button">Aplicar</button>
+      </mat-datepicker-actions>
+    </mat-date-range-picker>
   </mat-form-field>
 
-  @if (filters.periodPreset === 'custom') {
-    <mat-form-field appearance="outline" class="dashboard-filters__field dashboard-filters__field--date">
-      <mat-label>De</mat-label>
-      <input
-        matInput
-        type="date"
-        [ngModel]="filters.startDate"
-        (ngModelChange)="onCustomStartChange($event)"
-      />
-    </mat-form-field>
+  <app-multi-autocomplete-field
+    class="dashboard-filters__field"
+    label="Robô"
+    [options]="robotOptions()"
+    [selectedIds]="filters.robotIds"
+    (selectedIdsChange)="onRobotsChange($event)"
+  ></app-multi-autocomplete-field>
 
-    <mat-form-field appearance="outline" class="dashboard-filters__field dashboard-filters__field--date">
-      <mat-label>Até</mat-label>
-      <input
-        matInput
-        type="date"
-        [ngModel]="filters.endDate"
-        (ngModelChange)="onCustomEndChange($event)"
-      />
-    </mat-form-field>
-  }
+  <app-multi-autocomplete-field
+    class="dashboard-filters__field"
+    label="Cliente"
+    [options]="clientOptions()"
+    [selectedIds]="filters.clientIds"
+    (selectedIdsChange)="onClientsChange($event)"
+  ></app-multi-autocomplete-field>
 
-  <mat-form-field appearance="outline" class="dashboard-filters__field">
-    <mat-label>Robô</mat-label>
-    <mat-select
-      multiple
-      [ngModel]="filters.robotIds"
-      (ngModelChange)="onRobotsChange($event)"
-    >
-      @for (robot of filterOptions?.robots ?? []; track robot.id) {
-        <mat-option [value]="robot.id">{{ robot.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="dashboard-filters__field">
-    <mat-label>Cliente</mat-label>
-    <mat-select
-      multiple
-      [ngModel]="filters.clientIds"
-      (ngModelChange)="onClientsChange($event)"
-    >
-      @for (client of filterOptions?.clients ?? []; track client.id) {
-        <mat-option [value]="client.id">{{ client.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="dashboard-filters__field">
-    <mat-label>Usuário</mat-label>
-    <mat-select
-      multiple
-      [ngModel]="filters.userIds"
-      (ngModelChange)="onUsersChange($event)"
-    >
-      @for (user of filterOptions?.users ?? []; track user.id) {
-        <mat-option [value]="user.id">{{ user.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <app-multi-autocomplete-field
+    class="dashboard-filters__field"
+    label="Usuário"
+    [options]="userOptions()"
+    [selectedIds]="filters.userIds"
+    (selectedIdsChange)="onUsersChange($event)"
+  ></app-multi-autocomplete-field>
 
   <mat-form-field appearance="outline" class="dashboard-filters__field">
     <mat-label>Status</mat-label>

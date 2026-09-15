@@ -60,10 +60,12 @@ export function formatPeriodLabel(filters: DashboardFilters): string {
 }
 
 export function defaultDashboardFilters(referenceDate: Date): DashboardFilters {
+  // O filtro de período já abre "Personalizado" (calendário visível),
+  // pré-carregado com os últimos 7 dias como ponto de partida.
   const { startDate, endDate } = resolvePeriodRange('7d', referenceDate);
 
   return {
-    periodPreset: '7d',
+    periodPreset: 'custom',
     startDate,
     endDate,
     robotIds: [],

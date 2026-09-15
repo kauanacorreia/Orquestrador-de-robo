@@ -68,10 +68,10 @@ describe('period.util', () => {
   });
 
   describe('defaultDashboardFilters', () => {
-    it('returns a 7-day preset with no dimension filters selected', () => {
+    it('opens already on "custom" (calendar visible), pre-loaded with the last 7 days', () => {
       const filters = defaultDashboardFilters(referenceDate);
 
-      expect(filters.periodPreset).toBe('7d');
+      expect(filters.periodPreset).toBe('custom');
       expect(filters.startDate).toBe('2026-08-18');
       expect(filters.endDate).toBe('2026-08-24');
       expect(filters.robotIds).toEqual([]);

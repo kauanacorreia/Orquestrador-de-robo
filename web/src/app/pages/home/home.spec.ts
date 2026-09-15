@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
@@ -15,7 +16,12 @@ describe('Home', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Home, NoopAnimationsModule],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideCharts(withDefaultRegisterables())],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideCharts(withDefaultRegisterables()),
+        provideNativeDateAdapter(),
+      ],
     }).compileComponents();
 
     store = TestBed.inject(DashboardStore);

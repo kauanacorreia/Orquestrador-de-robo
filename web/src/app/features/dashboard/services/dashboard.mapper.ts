@@ -17,14 +17,26 @@ export function toDashboardSummary(dto: DashboardSummaryDto): DashboardSummary {
   return {
     totalExecutions: dto.total_executions,
     successCount: dto.success_count,
-    successRate: dto.success_rate,
+    // O backend ja retorna a taxa em percentual (0-100, ex: 42.5). Guardamos
+    // aqui como fracao (0-1) para o template poder fazer `rate * 100`
+    // igual faz com as series do volumetria, sem duplicar a multiplicacao.
+    successRate: dto.success_rate / 100,
     failureCount: dto.failure_count,
-    failureRate: dto.failure_rate,
+    failureRate: dto.failure_rate / 100,
     failuresLast24h: dto.failures_last_24h,
-    failuresLast24hRate: dto.failures_last_24h_rate,
+    failuresLast24hRate: dto.failures_last_24h_rate / 100,
     activeRobots: dto.active_robots,
     activeUsers: dto.active_users,
     clients: dto.clients,
+    criticalRobot: dto.critical_robot
+      ? {
+          robotId: dto.critical_robot.robot_id,
+          robotName: dto.critical_robot.robot_name,
+          totalExecutions: dto.critical_robot.total_executions,
+          errors: dto.critical_robot.errors,
+          errorRate: dto.critical_robot.error_rate / 100,
+        }
+      : null,
   };
 }
 

@@ -4,16 +4,36 @@
   [class.kpi-card--attention]="attention()"
 >
   <mat-card-content class="kpi-card__content">
-    <span class="kpi-card__label">{{ label() }}</span>
+    <div class="kpi-card__header">
+      <span class="kpi-card__label">{{ label() }}</span>
 
-    @if (secondaryValue() === null || secondaryValue() === undefined) {
-      <span class="kpi-card__value">{{ value() }}</span>
-    } @else if (emphasis() === 'secondaryValue') {
-      <span class="kpi-card__value kpi-card__value--emphasis">{{ secondaryValue() }}</span>
-      <span class="kpi-card__value kpi-card__value--muted">{{ value() }}</span>
-    } @else {
-      <span class="kpi-card__value">{{ value() }}</span>
-      <span class="kpi-card__value kpi-card__value--muted">{{ secondaryValue() }}</span>
+      @if (tooltip()) {
+        <mat-icon
+          class="kpi-card__info"
+          [matTooltip]="tooltip()!"
+          matTooltipPosition="above"
+          tabindex="0"
+          [attr.aria-label]="tooltip()"
+        >
+          help_outline
+        </mat-icon>
+      }
+    </div>
+
+    <span class="kpi-card__value">{{ value() }}</span>
+
+    @if (unitLabel()) {
+      <span class="kpi-card__unit">{{ unitLabel() }}</span>
+    }
+
+    @if (secondaryValue() !== null && secondaryValue() !== undefined) {
+      <div class="kpi-card__rate">
+        @if (rateLabel()) {
+          <span class="kpi-card__rate-label">{{ rateLabel() }}</span>
+        }
+
+        <span class="kpi-card__value kpi-card__value--muted">{{ secondaryValue() }}</span>
+      </div>
     }
 
     @if (subtitle()) {

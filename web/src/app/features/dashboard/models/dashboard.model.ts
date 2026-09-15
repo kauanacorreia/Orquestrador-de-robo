@@ -12,6 +12,14 @@ export interface DashboardFilters {
   statuses: ActivityLogStatus[];
 }
 
+export interface CriticalRobot {
+  robotId: string;
+  robotName: string | null;
+  totalExecutions: number;
+  errors: number;
+  errorRate: number;
+}
+
 export interface DashboardSummary {
   totalExecutions: number;
   successCount: number;
@@ -23,6 +31,7 @@ export interface DashboardSummary {
   activeRobots: number;
   activeUsers: number;
   clients: number;
+  criticalRobot: CriticalRobot | null;
 }
 
 export interface VolumetriaPoint {
@@ -71,6 +80,14 @@ export interface ActivityLog {
   step: string;
 }
 
+export interface CriticalRobotDto {
+  robot_id: string;
+  robot_name: string | null;
+  total_executions: number;
+  errors: number;
+  error_rate: number;
+}
+
 export interface DashboardSummaryDto {
   total_executions: number;
   success_count: number;
@@ -82,6 +99,7 @@ export interface DashboardSummaryDto {
   active_robots: number;
   active_users: number;
   clients: number;
+  critical_robot: CriticalRobotDto | null;
 }
 
 export interface VolumetriaPointDto {

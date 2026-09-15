@@ -36,4 +36,16 @@ describe('VolumetriaChart', () => {
     expect(component.chartData().datasets[1].label).toBe('Falha');
     expect(component.chartData().datasets[1].data).toEqual([2, 2]);
   });
+
+  it('tooltip shows the gross total and the success/failure rate for the day', () => {
+    const afterBody = component.chartOptions()?.plugins?.tooltip?.callbacks?.afterBody as (
+      items: { dataIndex: number }[],
+    ) => string[];
+
+    const lines = afterBody([{ dataIndex: 0 }] as any);
+
+    expect(lines).toContain('Total (bruto): 10 execuções');
+    expect(lines).toContain('Taxa de sucesso: 80,0%');
+    expect(lines).toContain('Taxa de falha: 20,0%');
+  });
 });

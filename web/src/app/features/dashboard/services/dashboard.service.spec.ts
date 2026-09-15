@@ -37,14 +37,15 @@ describe('DashboardService', () => {
     const dto: DashboardSummaryDto = {
       total_executions: 1250,
       success_count: 1180,
-      success_rate: 0.944,
+      success_rate: 80,
       failure_count: 70,
-      failure_rate: 0.056,
+      failure_rate: 20,
       failures_last_24h: 12,
-      failures_last_24h_rate: 0.08,
+      failures_last_24h_rate: 50,
       active_robots: 3,
       active_users: 12,
       clients: 34,
+      critical_robot: null,
     };
 
     let result: unknown;
@@ -64,14 +65,15 @@ describe('DashboardService', () => {
     expect(result).toEqual({
       totalExecutions: 1250,
       successCount: 1180,
-      successRate: 0.944,
+      successRate: 0.8,
       failureCount: 70,
-      failureRate: 0.056,
+      failureRate: 0.2,
       failuresLast24h: 12,
-      failuresLast24hRate: 0.08,
+      failuresLast24hRate: 0.5,
       activeRobots: 3,
       activeUsers: 12,
       clients: 34,
+      criticalRobot: null,
     });
   });
 

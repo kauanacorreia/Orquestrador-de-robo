@@ -12,39 +12,60 @@
 
   @if (summary(); as summary) {
     <div class="dashboard-home__kpis">
-      <app-kpi-card label="Total de execuções" [value]="summary.totalExecutions"></app-kpi-card>
-
       <app-kpi-card
-        label="Sucesso"
-        [value]="summary.successCount"
-        [secondaryValue]="(summary.successRate * 100).toFixed(1) + '%'"
-        [subtitle]="periodLabel(filters())"
-        variant="success"
-      ></app-kpi-card>
-
-      <app-kpi-card
-        label="Falha"
-        [value]="summary.failureCount"
-        [secondaryValue]="(summary.failureRate * 100).toFixed(1) + '%'"
-        [subtitle]="periodLabel(filters())"
-        emphasis="secondaryValue"
-        variant="danger"
-        [attention]="true"
+        label="Total de execuções"
+        [value]="summary.totalExecutions"
+        tooltip="Quantidade total de execuções de robôs no período e filtros selecionados."
       ></app-kpi-card>
 
       <app-kpi-card
         label="Falhas (últimas 24h)"
         [value]="summary.failuresLast24h"
-        [secondaryValue]="(summary.failuresLast24hRate * 100).toFixed(1) + '%'"
-        subtitle="Últimas 24 horas"
-        emphasis="secondaryValue"
+        unitLabel="finalizadas com falha"
+        rateLabel="Taxa de falhas (24h)"
+        [secondaryValue]="formatPercent(summary.failuresLast24hRate)"
         variant="danger"
         [attention]="true"
+        tooltip="Falhas ocorridas nas últimas 24 horas, independente do período selecionado no filtro."
       ></app-kpi-card>
 
-      <app-kpi-card label="Robôs ativos" [value]="summary.activeRobots"></app-kpi-card>
-      <app-kpi-card label="Usuários" [value]="summary.activeUsers"></app-kpi-card>
-      <app-kpi-card label="Clientes" [value]="summary.clients"></app-kpi-card>
+      @if (summary.criticalRobot; as criticalRobot) {
+        <app-kpi-card
+          label="Robô mais crítico"
+          [value]="criticalRobot.robotName ?? 'Robô removido'"
+          [unitLabel]="criticalRobot.totalExecutions + ' execuções · ' + criticalRobot.errors + ' erros'"
+          rateLabel="Taxa de erro"
+          [secondaryValue]="formatPercent(criticalRobot.errorRate)"
+          variant="danger"
+          [attention]="true"
+          tooltip="Robô com mais execuções com falha no período e filtros selecionados (nome, total de execuções, erros e taxa de erro)."
+        ></app-kpi-card>
+      } @else {
+        <app-kpi-card
+          label="Robô mais crítico"
+          value="—"
+          unitLabel="Nenhuma falha no período"
+          tooltip="Robô com mais execuções com falha no período e filtros selecionados. Nenhuma falha registrada neste recorte."
+        ></app-kpi-card>
+      }
+
+      <app-kpi-card
+        label="Robôs ativos"
+        [value]="summary.activeRobots"
+        tooltip="Robôs com status Ativo cadastrados no Orquestrador (não depende do período/filtro)."
+      ></app-kpi-card>
+
+      <app-kpi-card
+        label="Usuários"
+        [value]="summary.activeUsers"
+        tooltip="Usuários com login registrado nas últimas 24 horas (não depende do período/filtro)."
+      ></app-kpi-card>
+
+      <app-kpi-card
+        label="Clientes"
+        [value]="summary.clients"
+        tooltip="Total de empresas (clientes) cadastradas no Orquestrador (não depende do período/filtro)."
+      ></app-kpi-card>
     </div>
   } @else if (loading()) {
     <p class="dashboard-home__loading">Carregando dashboard...</p>
@@ -57,20 +78,22 @@
       <h2>Volumetria por dia</h2>
       <app-volumetria-chart [data]="volumetria()"></app-volumetria-chart>
     </div>
-
-    <div class="dashboard-home__chart">
-      <h2>Taxa de sucesso (%)</h2>
-      <app-rate-chart label="Taxa de sucesso" color="#2e7d32" [data]="successRateSeries()"></app-rate-chart>
-    </div>
-
-    <div class="dashboard-home__chart">
-      <h2>Taxa de erro (%)</h2>
-      <app-rate-chart label="Taxa de erro" color="#c62828" [data]="failureRateSeries()"></app-rate-chart>
-    </div>
   </section>
 
   <section class="dashboard-home__activity">
-    <h2>Atividades em tempo real</h2>
-    <app-activity-table [logs]="logs()"></app-activity-table>
+    <div class="dashboard-home__activity-header">
+      <h2>Atividades em tempo real</h2>
+
+      <mat-form-field appearance="outline" class="dashboard-home__activity-limit">
+        <mat-label>Exibir</mat-label>
+        <mat-select [ngModel]="activityLimit()" (ngModelChange)="setActivityLimit($event)">
+          @for (option of activityLimitOptions; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <app-activity-table [logs]="visibleLogs()"></app-activity-table>
   </section>
 </div>
