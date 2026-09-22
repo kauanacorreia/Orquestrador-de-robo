@@ -11,68 +11,130 @@ import {
   SaveCompanyRobotConfigResponse
 } from '../models/company-robot-config.model';
 
+
 @Injectable({
   providedIn: 'root'
 })
 export class CompanyRobotConfigService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/v1`;
 
+  private readonly http = inject(HttpClient);
+
+  private readonly baseUrl =
+    `${environment.apiUrl}/v1`;
+
+
+  /**
+   * Lista todas as empresas.
+   */
   listCompanies(): Observable<Company[]> {
+
     return this.http.get<Company[]>(
       `${this.baseUrl}/companies`
     );
+
   }
 
-  getCompany(companyId: string): Observable<Company> {
+
+  /**
+   * Busca uma empresa específica.
+   */
+  getCompany(
+    companyId: string
+  ): Observable<Company> {
+
     return this.http.get<Company>(
       `${this.baseUrl}/companies/${companyId}`
     );
+
   }
 
+
+  /**
+   * Cadastra uma nova empresa.
+   */
   createCompany(
     payload: CompanyPayload
   ): Observable<Company> {
+
     return this.http.post<Company>(
       `${this.baseUrl}/companies`,
       payload
     );
+
   }
 
+
+  /**
+   * Atualiza uma empresa existente.
+   */
   updateCompany(
     companyId: string,
     payload: CompanyPayload
   ): Observable<Company> {
+
     return this.http.patch<Company>(
       `${this.baseUrl}/companies/${companyId}`,
       payload
     );
+
   }
 
-  toggleStatus(companyId: string): Observable<Company> {
+
+  /**
+   * Alterna o status da empresa
+   * entre ativo e inativo.
+   */
+  toggleStatus(
+    companyId: string
+  ): Observable<Company> {
+
     return this.http.patch<Company>(
       `${this.baseUrl}/companies/${companyId}/toggle_status`,
       {}
     );
+
   }
 
+
+  /**
+   * Consulta a configuração de um robô
+   * para uma empresa específica.
+   *
+   * A resposta inclui:
+   * - Empresa
+   * - Robô
+   * - Schema do robô
+   * - Parâmetros já cadastrados
+   */
   getConfiguration(
     companyId: string,
     robotId: string
   ): Observable<CompanyRobotConfigResponse> {
+
     return this.http.get<CompanyRobotConfigResponse>(
       `${this.baseUrl}/companies/${companyId}/robots/${robotId}`
     );
+
   }
 
+
+  /**
+   * Salva ou atualiza os parâmetros
+   * de um robô para uma empresa.
+   */
   saveConfiguration(
     companyId: string,
     robotId: string,
     parameters: Record<string, unknown>
   ): Observable<SaveCompanyRobotConfigResponse> {
+
     return this.http.put<SaveCompanyRobotConfigResponse>(
       `${this.baseUrl}/companies/${companyId}/robots/${robotId}`,
-      { parameters }
+      {
+        parameters
+      }
     );
+
   }
+
 }
