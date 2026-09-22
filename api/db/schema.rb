@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_142419) do
   create_schema "extensions"
 
   # These are extensions that must be enabled in order to support this database
@@ -40,6 +40,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_020000) do
     t.index ["code"], name: "index_companies_on_code", unique: true
     t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'INACTIVE'::text])", name: "companies_status_check"
     t.unique_constraint ["cnpj"], name: "companies_cnpj_key"
+  end
+
+  create_table "public.company_group_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_group_id", null: false
+    t.uuid "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_group_id", "company_id"], name: "idx_company_group_memberships_unique", unique: true
+    t.index ["company_group_id"], name: "index_company_group_memberships_on_company_group_id"
+    t.index ["company_id"], name: "index_company_group_memberships_on_company_id"
+  end
+
+  create_table "public.company_groups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_company_groups_on_name"
   end
 
   create_table "public.company_robot_configs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -140,6 +157,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_020000) do
     t.check_constraint "status = ANY (ARRAY['ACTIVE'::text, 'PAUSED'::text])", name: "schedules_status_check"
   end
 
+  add_foreign_key "public.company_group_memberships", "public.companies"
+  add_foreign_key "public.company_group_memberships", "public.company_groups"
   add_foreign_key "public.company_robot_configs", "public.companies", name: "company_robot_configs_company_id_fkey", on_delete: :cascade
   add_foreign_key "public.company_robot_configs", "public.robots", name: "company_robot_configs_robot_id_fkey", on_delete: :cascade
   add_foreign_key "public.execution_logs", "public.executions", name: "execution_logs_execution_id_fkey", on_delete: :cascade

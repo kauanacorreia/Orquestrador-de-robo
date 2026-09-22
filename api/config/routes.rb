@@ -17,6 +17,7 @@ Rails.application.routes.draw do
                 :create,
                 :update
               ] do
+
       member do
         post :new_version
         get :versions
@@ -39,6 +40,7 @@ Rails.application.routes.draw do
                 :index,
                 :show
               ] do
+
       member do
         get :logs
       end
@@ -50,6 +52,7 @@ Rails.application.routes.draw do
                 :create,
                 :update
               ] do
+
       member do
         patch :toggle_status
         post :run_now
@@ -77,6 +80,14 @@ Rails.application.routes.draw do
             to:
               "company_robot_configs#update"
       end
+
+      resources :company_groups,
+                only: [
+                  :index,
+                  :show,
+                  :create,
+                  :update
+                ]
 
       resources :users,
                 only: [
