@@ -1,0 +1,727 @@
+<section class="page">
+
+  <header class="page-header">
+
+    <div>
+      <h1>Grupos de Empresas</h1>
+
+      <p>
+        Organize empresas em grupos reutilizáveis
+        para execuções e agendamentos.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="new-group-button"
+      (click)="openCreate()"
+    >
+      <mat-icon>add</mat-icon>
+      Criar Grupo
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       FILTROS
+       ===================================================== -->
+
+  <mat-card class="toolbar-card">
+
+    <mat-card-content>
+
+      <div class="toolbar">
+
+        <mat-form-field
+          appearance="outline"
+          class="search-field"
+        >
+          <mat-label>
+            Buscar grupo
+          </mat-label>
+
+          <mat-icon matPrefix>
+            search
+          </mat-icon>
+
+          <input
+            matInput
+            [value]="searchTerm()"
+            placeholder="Nome do grupo"
+            (input)="
+              setSearch(
+                $any($event.target).value
+              )
+            "
+          />
+        </mat-form-field>
+
+
+        <div class="groups-summary">
+
+          <strong>
+            {{ filteredGroups().length }}
+          </strong>
+
+          <span>
+            {{
+              filteredGroups().length === 1
+                ? 'grupo'
+                : 'grupos'
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </mat-card-content>
+
+  </mat-card>
+
+
+  <!-- =====================================================
+       LOADING
+       ===================================================== -->
+
+  <div
+    class="loading"
+    *ngIf="loading()"
+  >
+    <mat-spinner
+      diameter="42"
+    ></mat-spinner>
+  </div>
+
+
+  <!-- =====================================================
+       ERRO
+       ===================================================== -->
+
+  <div
+    class="error"
+    *ngIf="
+      !loading() &&
+      errorMessage()
+    "
+  >
+
+    <mat-icon>
+      error_outline
+    </mat-icon>
+
+    {{ errorMessage() }}
+
+  </div>
+
+
+  <!-- =====================================================
+       LISTAGEM
+       ===================================================== -->
+
+  <mat-card
+    class="table-card"
+    *ngIf="!loading()"
+  >
+
+    <div
+      class="table-wrapper"
+      *ngIf="
+        filteredGroups().length > 0
+      "
+    >
+
+      <table class="groups-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Grupo
+            </th>
+
+            <th class="companies-column">
+              Empresas
+            </th>
+
+            <th class="updated-column">
+              Última atualização
+            </th>
+
+            <th class="actions-column">
+              Ações
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let group
+              of pagedGroups()
+            "
+          >
+
+            <td>
+
+              <div class="group-name">
+
+                <div class="group-icon">
+                  <mat-icon>
+                    account_tree
+                  </mat-icon>
+                </div>
+
+                <span>
+                  {{ group.name }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <td class="companies-column">
+
+              <span class="companies-count">
+
+                <mat-icon>
+                  business
+                </mat-icon>
+
+                {{ group.companies_count }}
+
+              </span>
+
+            </td>
+
+
+            <td class="updated-column">
+
+              {{
+                group.updated_at
+                  | date:'dd/MM/yyyy HH:mm'
+              }}
+
+            </td>
+
+
+            <td class="actions-column">
+
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar grupo"
+                (click)="openEdit(group)"
+              >
+                <mat-icon>
+                  edit
+                </mat-icon>
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ===================================================
+         VAZIO
+         =================================================== -->
+
+    <div
+      class="empty-list"
+      *ngIf="
+        filteredGroups().length === 0
+      "
+    >
+
+      <mat-icon>
+        account_tree
+      </mat-icon>
+
+      <h2>
+        Nenhum grupo encontrado
+      </h2>
+
+      <p>
+        Crie um grupo para organizar
+        empresas que serão executadas juntas.
+      </p>
+
+    </div>
+
+
+    <!-- ===================================================
+         PAGINAÇÃO
+         =================================================== -->
+
+    <mat-paginator
+      *ngIf="
+        filteredGroups().length > 0
+      "
+      [length]="
+        filteredGroups().length
+      "
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 25]"
+      showFirstLastButtons
+      (page)="onPage($event)"
+    >
+    </mat-paginator>
+
+  </mat-card>
+
+</section>
+
+
+<!-- =======================================================
+     DRAWER
+     ======================================================= -->
+
+<div
+  class="editor-backdrop"
+  *ngIf="editorMode()"
+  (click)="closeEditor()"
+>
+
+  <aside
+    class="editor-panel"
+    (click)="$event.stopPropagation()"
+  >
+
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
+    <header class="editor-header">
+
+      <div>
+
+        <span class="editor-eyebrow">
+
+          {{
+            editorMode() === 'create'
+              ? 'Novo grupo'
+              : 'Editar grupo'
+          }}
+
+        </span>
+
+        <h2>
+
+          {{
+            editorMode() === 'create'
+              ? 'Criar Grupo'
+              : editingGroup()?.name
+          }}
+
+        </h2>
+
+      </div>
+
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Fechar"
+        (click)="closeEditor()"
+      >
+        <mat-icon>
+          close
+        </mat-icon>
+      </button>
+
+    </header>
+
+
+    <!-- ===================================================
+         CONTEÚDO
+         =================================================== -->
+
+    <div class="editor-content">
+
+
+      <div
+        class="drawer-loading"
+        *ngIf="loadingGroup()"
+      >
+        <mat-spinner
+          diameter="38"
+        ></mat-spinner>
+      </div>
+
+
+      <ng-container
+        *ngIf="!loadingGroup()"
+      >
+
+
+        <!-- =================================================
+             NOME
+             ================================================= -->
+
+        <form
+          [formGroup]="groupForm"
+          class="group-form"
+        >
+
+          <div class="section-header">
+
+            <div class="section-icon">
+
+              <mat-icon>
+                account_tree
+              </mat-icon>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Dados do grupo
+              </h3>
+
+              <p>
+                Dê um nome para identificar
+                este conjunto de empresas.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+          >
+
+            <mat-label>
+              Nome do grupo
+            </mat-label>
+
+            <input
+              matInput
+              formControlName="name"
+              maxlength="120"
+              placeholder="Ex.: Fiscal Mensal"
+            />
+
+            <mat-error
+              *ngIf="
+                groupForm
+                  .get('name')
+                  ?.hasError('required')
+              "
+            >
+              Informe o nome do grupo.
+            </mat-error>
+
+          </mat-form-field>
+
+        </form>
+
+
+        <!-- =================================================
+             EMPRESAS
+             ================================================= -->
+
+        <section class="companies-section">
+
+          <div class="section-header">
+
+            <div class="section-icon">
+
+              <mat-icon>
+                business
+              </mat-icon>
+
+            </div>
+
+
+            <div>
+
+              <h3>
+                Empresas do grupo
+              </h3>
+
+              <p>
+                Selecione as empresas que
+                fazem parte deste grupo.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="company-tools">
+
+            <mat-form-field
+              appearance="outline"
+              class="company-search"
+            >
+
+              <mat-label>
+                Buscar empresa
+              </mat-label>
+
+              <mat-icon matPrefix>
+                search
+              </mat-icon>
+
+              <input
+                matInput
+                [value]="companySearchTerm()"
+                placeholder="Código, nome ou CNPJ"
+                (input)="
+                  setCompanySearch(
+                    $any($event.target).value
+                  )
+                "
+              />
+
+            </mat-form-field>
+
+
+            <div class="selection-actions">
+
+              <button
+                mat-button
+                type="button"
+                (click)="toggleAllVisible()"
+              >
+
+                {{
+                  allVisibleSelected()
+                    ? 'Desmarcar visíveis'
+                    : 'Selecionar visíveis'
+                }}
+
+              </button>
+
+
+              <button
+                mat-button
+                type="button"
+                [disabled]="
+                  selectedCount() === 0
+                "
+                (click)="clearSelection()"
+              >
+                Limpar seleção
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="selection-summary">
+
+            <strong>
+              {{ selectedCount() }}
+            </strong>
+
+            <span>
+
+              {{
+                selectedCount() === 1
+                  ? 'empresa selecionada'
+                  : 'empresas selecionadas'
+              }}
+
+            </span>
+
+          </div>
+
+
+          <!-- =================================================
+               LISTA DE EMPRESAS
+               ================================================= -->
+
+          <div class="companies-list">
+
+            <label
+              class="company-row"
+              [class.selected]="
+                isCompanySelected(
+                  company.id
+                )
+              "
+              *ngFor="
+                let company
+                of filteredCompanies()
+              "
+            >
+
+              <mat-checkbox
+                [checked]="
+                  isCompanySelected(
+                    company.id
+                  )
+                "
+                (change)="
+                  toggleCompany(
+                    company.id,
+                    $event.checked
+                  )
+                "
+              >
+              </mat-checkbox>
+
+
+              <div class="company-info">
+
+                <div class="company-title">
+
+                  <span class="company-code">
+                    {{ company.code || '—' }}
+                  </span>
+
+                  <strong>
+                    {{ company.name }}
+                  </strong>
+
+                </div>
+
+
+                <div class="company-meta">
+
+                  <span>
+                    {{ formatCnpj(company.cnpj) }}
+                  </span>
+
+                  <span class="meta-divider">
+                    •
+                  </span>
+
+                  <span
+                    class="company-status"
+                    [class.inactive]="
+                      company.status ===
+                      'INACTIVE'
+                    "
+                  >
+
+                    {{
+                      company.status ===
+                        'ACTIVE'
+                        ? 'Ativa'
+                        : 'Inativa'
+                    }}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </label>
+
+
+            <div
+              class="companies-empty"
+              *ngIf="
+                filteredCompanies().length === 0
+              "
+            >
+
+              <mat-icon>
+                search_off
+              </mat-icon>
+
+              <p>
+                Nenhuma empresa encontrada.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+    </div>
+
+
+    <!-- ===================================================
+         FOOTER
+         =================================================== -->
+
+    <footer class="editor-footer">
+
+      <div class="footer-count">
+
+        <strong>
+          {{ selectedCount() }}
+        </strong>
+
+        <span>
+          empresas no grupo
+        </span>
+
+      </div>
+
+
+      <div class="footer-spacer"></div>
+
+
+      <button
+        mat-button
+        type="button"
+        (click)="closeEditor()"
+      >
+        Cancelar
+      </button>
+
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="
+          saving() ||
+          loadingGroup() ||
+          groupForm.invalid
+        "
+        (click)="saveGroup()"
+      >
+
+        <mat-icon>
+          save
+        </mat-icon>
+
+        {{
+          saving()
+            ? 'Salvando...'
+            : editorMode() === 'create'
+              ? 'Criar Grupo'
+              : 'Salvar'
+        }}
+
+      </button>
+
+    </footer>
+
+  </aside>
+
+</div>
