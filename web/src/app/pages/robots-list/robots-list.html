@@ -29,30 +29,62 @@
             type="text"
             placeholder="Buscar por nome ou descrição"
             [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)"
+            (ngModelChange)="onSearchChange($event)"
           />
         </div>
 
-        <mat-select
-          class="filter-select"
-          [ngModel]="departmentFilter()"
-          (ngModelChange)="departmentFilter.set($event)"
+        <!-- Filtro de departamentos (menu + accordion + checkboxes) -->
+        <button
+          mat-stroked-button
+          class="dept-filter-trigger"
+          [class.active]="selectedDepartments().size > 0"
+          [matMenuTriggerFor]="deptMenu"
         >
-          <mat-option value="ALL">
-            Todos os departamentos
-          </mat-option>
+          <mat-icon>tune</mat-icon>
+          <span>{{ departmentFilterLabel() }}</span>
+          <mat-icon class="chevron">expand_more</mat-icon>
+        </button>
 
-          @for (dept of departments(); track dept) {
-            <mat-option [value]="dept">
-              {{ dept }}
-            </mat-option>
-          }
-        </mat-select>
+        <mat-menu #deptMenu="matMenu" class="dept-menu-panel">
+          <div class="dept-menu-content" (click)="$event.stopPropagation()">
+
+            <mat-accordion>
+              <mat-expansion-panel class="dept-panel">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Filtrar por departamento</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="dept-grid">
+                  @for (dept of departments(); track dept) {
+                    <mat-checkbox
+                      [checked]="isDepartmentSelected(dept)"
+                      (change)="toggleDepartment(dept)"
+                    >
+                      {{ dept }}
+                    </mat-checkbox>
+                  }
+                </div>
+
+                @if (selectedDepartments().size > 0) {
+                  <button
+                    mat-button
+                    class="clear-departments"
+                    (click)="clearDepartments()"
+                  >
+                    Limpar seleção
+                  </button>
+                }
+
+              </mat-expansion-panel>
+            </mat-accordion>
+
+          </div>
+        </mat-menu>
 
         <mat-select
           class="filter-select"
           [ngModel]="statusFilter()"
-          (ngModelChange)="statusFilter.set($event)"
+          (ngModelChange)="onStatusChange($event)"
         >
           <mat-option value="ACTIVE">
             Ativos
@@ -67,19 +99,16 @@
           </mat-option>
         </mat-select>
 
-        <mat-select
-          class="filter-select"
-          [ngModel]="sortBy()"
-          (ngModelChange)="sortBy.set($event)"
+        <button
+          mat-stroked-button
+          class="group-toggle"
+          [class.active]="groupByDepartment()"
+          (click)="toggleGroupByDepartment()"
+          matTooltip="Agrupar por departamento"
         >
-          <mat-option value="name">
-            Ordenar por nome
-          </mat-option>
-
-          <mat-option value="department">
-            Ordenar por departamento
-          </mat-option>
-        </mat-select>
+          <mat-icon>workspaces</mat-icon>
+          Agrupar por departamento
+        </button>
 
       </div>
 
@@ -189,7 +218,7 @@
 
   } @else if (viewMode() === 'grid') {
 
-    @if (sortBy() === 'department') {
+    @if (groupByDepartment()) {
 
       @for (group of groupedByDepartment(); track group.department) {
 
@@ -256,7 +285,15 @@
             mat-header-cell
             *matHeaderCellDef
           >
-            Nome
+            <button
+              type="button"
+              class="sort-header"
+              (click)="toggleTableSort('name')"
+              aria-label="Ordenar por nome"
+            >
+              <span>Nome</span>
+              <mat-icon>{{ sortIcon('name') }}</mat-icon>
+            </button>
           </th>
 
           <td
@@ -275,7 +312,15 @@
             mat-header-cell
             *matHeaderCellDef
           >
-            Departamento
+            <button
+              type="button"
+              class="sort-header"
+              (click)="toggleTableSort('department')"
+              aria-label="Ordenar por departamento"
+            >
+              <span>Departamento</span>
+              <mat-icon>{{ sortIcon('department') }}</mat-icon>
+            </button>
           </th>
 
           <td
@@ -294,7 +339,15 @@
             mat-header-cell
             *matHeaderCellDef
           >
-            Status
+            <button
+              type="button"
+              class="sort-header"
+              (click)="toggleTableSort('status')"
+              aria-label="Ordenar por status"
+            >
+              <span>Status</span>
+              <mat-icon>{{ sortIcon('status') }}</mat-icon>
+            </button>
           </th>
 
           <td

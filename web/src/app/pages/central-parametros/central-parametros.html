@@ -2,16 +2,14 @@
   <header class="page-header">
     <div>
       <h1>Empresas</h1>
-
-      <p>
-        Gerencie os clientes e suas configurações de automação.
-      </p>
+      <p>Gerencie os clientes e suas configurações de automação.</p>
     </div>
 
     <button
       mat-flat-button
       color="primary"
       type="button"
+      class="primary-action"
       (click)="openCreate()"
     >
       <mat-icon>add</mat-icon>
@@ -22,202 +20,117 @@
   <mat-card class="toolbar-card">
     <mat-card-content>
       <div class="toolbar">
-        <mat-form-field
-          appearance="outline"
-          class="search-field"
-        >
-          <mat-label>
-            Buscar empresa
-          </mat-label>
-
-          <mat-icon matPrefix>
-            search
-          </mat-icon>
-
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar empresa</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
           <input
             matInput
             [value]="searchTerm()"
-            placeholder="Código ou nome"
-            (input)="
-              setSearch(
-                $any($event.target).value
-              )
-            "
+            placeholder="Código, nome, CNPJ ou regime"
+            (input)="setSearch($any($event.target).value)"
           />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Status</mat-label>
-
           <mat-select
             [value]="statusFilter()"
-            (selectionChange)="
-              setStatusFilter(
-                $event.value
-              )
-            "
+            (selectionChange)="setStatusFilter($event.value)"
           >
-            <mat-option value="ALL">
-              Todas
-            </mat-option>
-
-            <mat-option value="ACTIVE">
-              Ativas
-            </mat-option>
-
-            <mat-option value="INACTIVE">
-              Inativas
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>
-            Ordenar por
-          </mat-label>
-
-          <mat-select
-            [value]="sortOption()"
-            (selectionChange)="
-              setSort(
-                $event.value
-              )
-            "
-          >
-            <mat-option value="name_asc">
-              Nome A–Z
-            </mat-option>
-
-            <mat-option value="name_desc">
-              Nome Z–A
-            </mat-option>
-
-            <mat-option value="code_asc">
-              Código crescente
-            </mat-option>
-
-            <mat-option value="code_desc">
-              Código decrescente
-            </mat-option>
+            <mat-option value="ALL">Todas</mat-option>
+            <mat-option value="ACTIVE">Ativas</mat-option>
+            <mat-option value="INACTIVE">Inativas</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <div
-    class="loading"
-    *ngIf="loading()"
-  >
-    <mat-spinner
-      diameter="42"
-    ></mat-spinner>
+  <div class="loading" *ngIf="loading()">
+    <mat-spinner diameter="42"></mat-spinner>
   </div>
 
-  <div
-    class="error"
-    *ngIf="
-      !loading() &&
-      errorMessage()
-    "
-  >
-    <mat-icon>
-      error_outline
-    </mat-icon>
-
-    {{ errorMessage() }}
+  <div class="error" *ngIf="!loading() && errorMessage()">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
   </div>
 
-  <mat-card
-    class="table-card"
-    *ngIf="!loading()"
-  >
-    <div
-      class="table-wrapper"
-      *ngIf="
-        filteredCompanies().length > 0
-      "
-    >
+  <mat-card class="table-card" *ngIf="!loading()">
+    <div class="table-wrapper" *ngIf="filteredCompanies().length > 0">
       <table class="companies-table">
         <thead>
           <tr>
             <th class="code-column">
-              Código
+              <button class="sort-header" type="button" (click)="toggleSort('code')">
+                Código
+                <mat-icon>{{ sortIcon('code') }}</mat-icon>
+              </button>
             </th>
 
-            <th>
-              Nome
+            <th class="name-column">
+              <button class="sort-header" type="button" (click)="toggleSort('name')">
+                Nome
+                <mat-icon>{{ sortIcon('name') }}</mat-icon>
+              </button>
+            </th>
+
+            <th class="cnpj-column">
+              <button class="sort-header" type="button" (click)="toggleSort('cnpj')">
+                CNPJ
+                <mat-icon>{{ sortIcon('cnpj') }}</mat-icon>
+              </button>
+            </th>
+
+            <th class="tax-column">
+              <button class="sort-header" type="button" (click)="toggleSort('tax_regime')">
+                Regime tributário
+                <mat-icon>{{ sortIcon('tax_regime') }}</mat-icon>
+              </button>
             </th>
 
             <th class="status-column">
-              Status
+              <button class="sort-header" type="button" (click)="toggleSort('status')">
+                Status
+                <mat-icon>{{ sortIcon('status') }}</mat-icon>
+              </button>
             </th>
 
             <th class="robots-count-column">
-              Robôs vinculados
+              <button class="sort-header centered" type="button" (click)="toggleSort('robots_count')">
+                Robôs
+                <mat-icon>{{ sortIcon('robots_count') }}</mat-icon>
+              </button>
             </th>
 
-            <th class="actions-column">
-              Ações
-            </th>
+            <th class="actions-column">Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr
-            *ngFor="
-              let company
-              of pagedCompanies()
-            "
-          >
-            <td class="company-code">
-              {{ company.code || '—' }}
-            </td>
-
-            <td class="company-name">
-              {{ company.name }}
-            </td>
-
+          <tr *ngFor="let company of pagedCompanies()">
+            <td class="company-code">{{ company.code || '—' }}</td>
+            <td class="company-name">{{ company.name }}</td>
+            <td>{{ formatCnpj(company.cnpj) }}</td>
+            <td>{{ company.tax_regime || '—' }}</td>
             <td>
               <span
                 class="status-badge"
-                [class.active]="
-                  company.status ===
-                  'ACTIVE'
-                "
-                [class.inactive]="
-                  company.status ===
-                  'INACTIVE'
-                "
+                [class.active]="company.status === 'ACTIVE'"
+                [class.inactive]="company.status === 'INACTIVE'"
               >
-                <span
-                  class="status-dot"
-                ></span>
-
-                {{
-                  companyStatusLabel(
-                    company.status
-                  )
-                }}
+                <span class="status-dot"></span>
+                {{ companyStatusLabel(company.status) }}
               </span>
             </td>
-
-            <td class="robots-count-column">
-              {{ company.robots_count }}
-            </td>
-
+            <td class="robots-count-column">{{ company.robots_count }}</td>
             <td class="actions-column">
               <button
                 mat-icon-button
                 type="button"
                 matTooltip="Editar empresa"
-                (click)="
-                  openEdit(company)
-                "
+                (click)="openEdit(company)"
               >
-                <mat-icon>
-                  edit
-                </mat-icon>
+                <mat-icon>edit</mat-icon>
               </button>
             </td>
           </tr>
@@ -225,69 +138,33 @@
       </table>
     </div>
 
-    <div
-      class="empty-list"
-      *ngIf="
-        filteredCompanies().length === 0
-      "
-    >
-      <mat-icon>
-        business
-      </mat-icon>
-
-      <h2>
-        Nenhuma empresa encontrada
-      </h2>
-
-      <p>
-        Altere os filtros ou cadastre
-        uma nova empresa.
-      </p>
+    <div class="empty-list" *ngIf="filteredCompanies().length === 0">
+      <mat-icon>business</mat-icon>
+      <h2>Nenhuma empresa encontrada</h2>
+      <p>Altere os filtros ou cadastre uma nova empresa.</p>
     </div>
 
     <mat-paginator
-      *ngIf="
-        filteredCompanies().length > 0
-      "
-      [length]="
-        filteredCompanies().length
-      "
+      *ngIf="filteredCompanies().length > 0"
+      [length]="filteredCompanies().length"
       [pageIndex]="pageIndex()"
       [pageSize]="pageSize()"
       [pageSizeOptions]="[5, 10, 25]"
       showFirstLastButtons
       (page)="onPage($event)"
-    >
-    </mat-paginator>
+    ></mat-paginator>
   </mat-card>
 </section>
 
-<div
-  class="editor-backdrop"
-  *ngIf="editorMode()"
-  (click)="closeEditor()"
->
-  <aside
-    class="editor-panel"
-    (click)="$event.stopPropagation()"
-  >
+<div class="editor-backdrop" *ngIf="editorMode()" (click)="closeEditor()">
+  <aside class="editor-panel" (click)="$event.stopPropagation()">
     <header class="editor-header">
       <div>
         <span class="editor-eyebrow">
-          {{
-            editorMode() === 'create'
-              ? 'Nova empresa'
-              : editingCompany()?.code
-                || 'Empresa'
-          }}
+          {{ editorMode() === 'create' ? 'Nova empresa' : (editingCompany()?.code || 'Empresa') }}
         </span>
-
         <h2>
-          {{
-            editorMode() === 'create'
-              ? 'Cadastrar Empresa'
-              : editingCompany()?.name
-          }}
+          {{ editorMode() === 'create' ? 'Cadastrar Empresa' : editingCompany()?.name }}
         </h2>
       </div>
 
@@ -297,420 +174,244 @@
         matTooltip="Fechar"
         (click)="closeEditor()"
       >
-        <mat-icon>
-          close
-        </mat-icon>
+        <mat-icon>close</mat-icon>
       </button>
     </header>
 
-    <div class="editor-content">
-      <form
-        [formGroup]="companyForm"
-        class="company-form"
-      >
-        <mat-accordion
-          multi
-          class="company-accordion"
+    <div class="editor-body">
+      <nav class="editor-menu" aria-label="Seções da empresa">
+        <button
+          type="button"
+          class="editor-menu-item"
+          [class.active]="activeSection() === 'company'"
+          (click)="setActiveSection('company')"
         >
-          <mat-expansion-panel
-            [expanded]="true"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon>
-                  business
-                </mat-icon>
+          <mat-icon>business</mat-icon>
+          <span>Dados da empresa</span>
+        </button>
 
-                Dados da empresa
-              </mat-panel-title>
-            </mat-expansion-panel-header>
+        <button
+          type="button"
+          class="editor-menu-item"
+          [class.active]="activeSection() === 'credentials'"
+          (click)="setActiveSection('credentials')"
+        >
+          <mat-icon>lock</mat-icon>
+          <span>Credenciais</span>
+        </button>
+
+        <button
+          type="button"
+          class="editor-menu-item"
+          [class.active]="activeSection() === 'robots'"
+          (click)="setActiveSection('robots')"
+        >
+          <mat-icon>tune</mat-icon>
+          <span>Configuração</span>
+        </button>
+      </nav>
+
+      <div class="editor-content">
+        <div [formGroup]="companyForm" class="company-form">
+          <section class="editor-section" *ngIf="activeSection() === 'company'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>business</mat-icon></div>
+              <div>
+                <h3>Dados da empresa</h3>
+                <p>Informações cadastrais utilizadas pelo Orquestrador.</p>
+              </div>
+            </div>
 
             <div class="form-grid">
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Código
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="code"
-                />
-
-                <mat-error
-                  *ngIf="
-                    companyForm
-                      .get('code')
-                      ?.hasError('required')
-                  "
-                >
+                <mat-label>Código</mat-label>
+                <input matInput formControlName="code" />
+                <mat-error *ngIf="companyForm.get('code')?.hasError('required')">
                   Campo obrigatório.
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Nome
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="name"
-                />
-
-                <mat-error
-                  *ngIf="
-                    companyForm
-                      .get('name')
-                      ?.hasError('required')
-                  "
-                >
+                <mat-label>Nome</mat-label>
+                <input matInput formControlName="name" />
+                <mat-error *ngIf="companyForm.get('name')?.hasError('required')">
                   Campo obrigatório.
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Pasta Empresa
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="company_folder"
-                />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>
-                  CNPJ
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="cnpj"
-                />
-
-                <mat-error
-                  *ngIf="
-                    companyForm
-                      .get('cnpj')
-                      ?.hasError('required')
-                  "
-                >
+                <mat-label>CNPJ</mat-label>
+                <input matInput formControlName="cnpj" />
+                <mat-error *ngIf="companyForm.get('cnpj')?.hasError('required')">
                   Campo obrigatório.
                 </mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Inscrição Estadual
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="state_registration"
-                />
+                <mat-label>Regime Tributário</mat-label>
+                <input matInput formControlName="tax_regime" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Regime Tributário
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="tax_regime"
-                />
+                <mat-label>Inscrição Estadual</mat-label>
+                <input matInput formControlName="state_registration" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  PIS/PASEP
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="pis_pasep"
-                />
+                <mat-label>Pasta da Empresa</mat-label>
+                <input matInput formControlName="company_folder" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Variação Monetária
-                </mat-label>
-
-                <input
-                  matInput
-                  formControlName="monetary_variation"
-                />
+                <mat-label>PIS/PASEP</mat-label>
+                <input matInput formControlName="pis_pasep" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Número da Conta
-                </mat-label>
+                <mat-label>Variação Monetária</mat-label>
+                <input matInput formControlName="monetary_variation" />
+              </mat-form-field>
 
+              <mat-form-field appearance="outline">
+                <mat-label>Número da Conta</mat-label>
+                <input matInput formControlName="account_number" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>E-mail para notificações</mat-label>
                 <input
                   matInput
-                  formControlName="account_number"
+                  type="email"
+                  autocomplete="email"
+                  formControlName="notification_email"
                 />
+                <mat-error *ngIf="companyForm.get('notification_email')?.hasError('email')">
+                  Informe um e-mail válido.
+                </mat-error>
               </mat-form-field>
 
               <div class="checkbox-field">
-                <mat-checkbox
-                  formControlName="simple_national_opt_in"
-                >
+                <mat-checkbox formControlName="simple_national_opt_in">
                   Optante pelo Simples Nacional
                 </mat-checkbox>
               </div>
             </div>
-          </mat-expansion-panel>
+          </section>
 
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon>
-                  lock
-                </mat-icon>
-
-                Credenciais
-              </mat-panel-title>
-            </mat-expansion-panel-header>
+          <section class="editor-section" *ngIf="activeSection() === 'credentials'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>lock</mat-icon></div>
+              <div>
+                <h3>Credenciais</h3>
+                <p>Dados de acesso utilizados pelas automações da empresa.</p>
+              </div>
+            </div>
 
             <div class="form-grid">
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Senha
-                </mat-label>
-
+                <mat-label>Senha</mat-label>
                 <input
                   matInput
                   type="password"
                   autocomplete="new-password"
                   formControlName="access_password"
                 />
-
-                <mat-hint
-                  *ngIf="
-                    editingCompany()
-                      ?.access_password_configured
-                  "
-                >
-                  Já configurada.
-                  Preencha apenas para substituir.
+                <mat-hint *ngIf="editingCompany()?.access_password_configured">
+                  Já configurada. Preencha apenas para substituir.
                 </mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>
-                  Frase Secreta
-                </mat-label>
-
+                <mat-label>Frase Secreta</mat-label>
                 <input
                   matInput
                   type="password"
                   autocomplete="new-password"
                   formControlName="secret_phrase"
                 />
-
-                <mat-hint
-                  *ngIf="
-                    editingCompany()
-                      ?.secret_phrase_configured
-                  "
-                >
-                  Já configurada.
-                  Preencha apenas para substituir.
+                <mat-hint *ngIf="editingCompany()?.secret_phrase_configured">
+                  Já configurada. Preencha apenas para substituir.
                 </mat-hint>
               </mat-form-field>
             </div>
-          </mat-expansion-panel>
+          </section>
 
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon>
-                  smart_toy
-                </mat-icon>
-
-                Configurações de Robôs
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-
-            <div
-              class="robot-create-warning"
-              *ngIf="
-                editorMode() === 'create'
-              "
-            >
-              <mat-icon>
-                info
-              </mat-icon>
-
+          <section class="editor-section" *ngIf="activeSection() === 'robots'">
+            <div class="section-header">
+              <div class="section-icon"><mat-icon>tune</mat-icon></div>
               <div>
-                <strong>
-                  Salve a empresa primeiro.
-                </strong>
-
-                <p>
-                  Depois do cadastro,
-                  você poderá configurar
-                  os parâmetros dos robôs.
-                </p>
+                <h3>Configuração</h3>
+                <p>Defina os parâmetros específicos de cada robô para esta empresa.</p>
               </div>
             </div>
 
-            <ng-container
-              *ngIf="
-                editorMode() === 'edit'
-              "
-            >
-              <mat-form-field
-                appearance="outline"
-                class="robot-select"
-              >
-                <mat-label>
-                  Robô
-                </mat-label>
+            <div class="robot-create-warning" *ngIf="editorMode() === 'create'">
+              <mat-icon>info</mat-icon>
+              <div>
+                <strong>Salve a empresa primeiro.</strong>
+                <p>Depois do cadastro, os robôs poderão ser configurados para esta empresa.</p>
+              </div>
+            </div>
 
+            <ng-container *ngIf="editorMode() === 'edit'">
+              <mat-form-field appearance="outline" class="robot-select">
+                <mat-label>Selecionar robô</mat-label>
                 <mat-select
-                  [value]="
-                    selectedRobotId()
-                  "
-                  (selectionChange)="
-                    onRobotChange(
-                      $event.value
-                    )
-                  "
+                  [value]="selectedRobotId()"
+                  (selectionChange)="onRobotChange($event.value)"
                 >
-                  <mat-option
-                    *ngFor="
-                      let robot
-                      of robots()
-                    "
-                    [value]="robot.id"
-                  >
+                  <mat-option *ngFor="let robot of robots()" [value]="robot.id">
                     {{ robot.name }}
+                    <span *ngIf="robot.department"> · {{ robot.department }}</span>
                   </mat-option>
                 </mat-select>
               </mat-form-field>
 
-              <div
-                class="configuration-loading"
-                *ngIf="
-                  loadingConfiguration()
-                "
-              >
-                <mat-spinner
-                  diameter="36"
-                ></mat-spinner>
+              <div class="configuration-loading" *ngIf="loadingConfiguration()">
+                <mat-spinner diameter="36"></mat-spinner>
               </div>
 
               <div
                 class="robot-empty"
-                *ngIf="
-                  !selectedRobotId() &&
-                  !loadingConfiguration()
-                "
+                *ngIf="!selectedRobotId() && !loadingConfiguration()"
               >
-                <mat-icon>
-                  tune
-                </mat-icon>
-
-                <p>
-                  Selecione um robô
-                  para visualizar
-                  seus parâmetros.
-                </p>
+                <mat-icon>tune</mat-icon>
+                <p>Selecione um robô para visualizar seus parâmetros.</p>
               </div>
 
               <div
                 class="robot-configuration"
-                *ngIf="
-                  configuration() &&
-                  !loadingConfiguration()
-                "
+                *ngIf="configuration() && !loadingConfiguration()"
               >
                 <div class="robot-config-header">
-                  <div>
-                    <strong>
-                      {{
-                        configuration()
-                          ?.robot
-                          ?.name
-                      }}
-                    </strong>
-
-                    <span>
-                      Parâmetros específicos
-                      desta empresa
-                    </span>
-                  </div>
+                  <strong>{{ configuration()?.robot?.name }}</strong>
+                  <span>Parâmetros específicos desta empresa</span>
                 </div>
 
-                <form
-                  class="dynamic-form"
-                  [formGroup]="parametersForm"
-                >
+                <form class="dynamic-form" [formGroup]="parametersForm">
                   <ng-container
-                    *ngFor="
-                      let field
-                      of configuration()
-                        ?.robot
-                        ?.schema
-                        ?.fields
-                    "
+                    *ngFor="let field of configuration()?.robot?.schema?.fields"
                   >
                     <mat-checkbox
-                      *ngIf="
-                        isBoolean(field)
-                      "
-                      [formControlName]="
-                        field.name
-                      "
+                      *ngIf="isBoolean(field)"
+                      [formControlName]="field.name"
                     >
-                      {{
-                        fieldLabel(field)
-                      }}
-
-                      <span
-                        *ngIf="
-                          field.required
-                        "
-                      >
-                        *
-                      </span>
+                      {{ fieldLabel(field) }}
+                      <span *ngIf="field.required">*</span>
                     </mat-checkbox>
 
                     <mat-form-field
-                      *ngIf="
-                        !isBoolean(field)
-                      "
+                      *ngIf="!isBoolean(field)"
                       appearance="outline"
                     >
-                      <mat-label>
-                        {{
-                          fieldLabel(field)
-                        }}
-                      </mat-label>
-
+                      <mat-label>{{ fieldLabel(field) }}</mat-label>
                       <input
                         matInput
                         [type]="inputType(field)"
                         [formControlName]="field.name"
                       />
-
-                      <mat-hint
-                        *ngIf="field.required"
-                      >
-                        Campo obrigatório
-                      </mat-hint>
-
                       <mat-error
-                        *ngIf="
-                          parametersForm
-                            .get(field.name)
-                            ?.hasError('required')
-                        "
+                        *ngIf="parametersForm.get(field.name)?.hasError('required')"
                       >
                         Este campo é obrigatório.
                       </mat-error>
@@ -719,16 +420,9 @@
 
                   <div
                     class="no-fields"
-                    *ngIf="
-                      configuration()
-                        ?.robot
-                        ?.schema
-                        ?.fields
-                        ?.length === 0
-                    "
+                    *ngIf="configuration()?.robot?.schema?.fields?.length === 0"
                   >
-                    Este robô não possui
-                    parâmetros configurados.
+                    Este robô não possui parâmetros configurados.
                   </div>
                 </form>
 
@@ -737,74 +431,38 @@
                     mat-flat-button
                     color="primary"
                     type="button"
-                    [disabled]="
-                      savingConfiguration() ||
-                      parametersForm.invalid
-                    "
-                    (click)="
-                      saveRobotConfiguration()
-                    "
+                    [disabled]="savingConfiguration() || parametersForm.invalid"
+                    (click)="saveRobotConfiguration()"
                   >
-                    <mat-icon>
-                      save
-                    </mat-icon>
-
-                    {{
-                      savingConfiguration()
-                        ? 'Salvando...'
-                        : 'Salvar Configuração'
-                    }}
+                    <mat-icon>save</mat-icon>
+                    {{ savingConfiguration() ? 'Salvando...' : 'Salvar Configuração' }}
                   </button>
                 </div>
               </div>
             </ng-container>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </form>
+          </section>
+        </div>
+      </div>
     </div>
 
     <footer class="editor-footer">
       <button
-        *ngIf="
-          editorMode() === 'edit'
-        "
+        *ngIf="editorMode() === 'edit'"
         mat-stroked-button
         type="button"
         class="status-action"
-        [class.activate]="
-          editingCompany()?.status ===
-          'INACTIVE'
-        "
-        (click)="
-          toggleCurrentCompanyStatus()
-        "
+        [class.activate]="editingCompany()?.status === 'INACTIVE'"
+        (click)="toggleCurrentCompanyStatus()"
       >
         <mat-icon>
-          {{
-            editingCompany()?.status ===
-            'ACTIVE'
-              ? 'block'
-              : 'check_circle'
-          }}
+          {{ editingCompany()?.status === 'ACTIVE' ? 'block' : 'check_circle' }}
         </mat-icon>
-
-        {{
-          editingCompany()?.status ===
-          'ACTIVE'
-            ? 'Desativar Empresa'
-            : 'Ativar Empresa'
-        }}
+        {{ editingCompany()?.status === 'ACTIVE' ? 'Desativar Empresa' : 'Ativar Empresa' }}
       </button>
 
       <div class="footer-spacer"></div>
 
-      <button
-        mat-button
-        type="button"
-        (click)="closeEditor()"
-      >
-        Cancelar
-      </button>
+      <button mat-button type="button" (click)="closeEditor()">Cancelar</button>
 
       <button
         mat-flat-button
@@ -813,17 +471,8 @@
         [disabled]="savingCompany()"
         (click)="saveCompany()"
       >
-        <mat-icon>
-          save
-        </mat-icon>
-
-        {{
-          savingCompany()
-            ? 'Salvando...'
-            : editorMode() === 'create'
-              ? 'Cadastrar'
-              : 'Salvar'
-        }}
+        <mat-icon>save</mat-icon>
+        {{ savingCompany() ? 'Salvando...' : (editorMode() === 'create' ? 'Cadastrar' : 'Salvar') }}
       </button>
     </footer>
   </aside>

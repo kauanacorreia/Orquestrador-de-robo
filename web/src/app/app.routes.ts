@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+
 import {
   provideCharts,
   withDefaultRegisterables
@@ -23,15 +24,19 @@ export const routes: Routes = [
   {
     path: '',
     component: Shell,
+
     children: [
+
       {
         path: 'home',
+
         loadComponent: () =>
-          import('./pages/home/home')
-            .then(
-              module =>
-                module.Home
-            ),
+          import(
+            './pages/home/home'
+          ).then(
+            module =>
+              module.Home
+          ),
 
         providers: [
           provideCharts(
@@ -47,6 +52,7 @@ export const routes: Routes = [
 
       {
         path: 'parametros',
+
         loadComponent: () =>
           import(
             './pages/central-parametros/central-parametros'
@@ -57,7 +63,20 @@ export const routes: Routes = [
       },
 
       {
+        path: 'grupos-empresas',
+
+        loadComponent: () =>
+          import(
+            './pages/company-groups/company-groups'
+          ).then(
+            module =>
+              module.CompanyGroups
+          )
+      },
+
+      {
         path: 'acessos',
+
         loadComponent: () =>
           import(
             './pages/access-control/access-control'
@@ -69,6 +88,7 @@ export const routes: Routes = [
 
       {
         path: 'agendamentos',
+
         loadComponent: () =>
           import(
             './pages/scheduler/scheduler'
@@ -80,6 +100,7 @@ export const routes: Routes = [
 
       {
         path: 'historico',
+
         loadComponent: () =>
           import(
             './pages/execution-history/execution-history'

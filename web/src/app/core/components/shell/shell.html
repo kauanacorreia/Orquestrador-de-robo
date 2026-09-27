@@ -5,9 +5,13 @@
   <aside class="sidebar">
 
     <div class="sidebar-top">
+
       <div class="brand">
+
         <div class="brand-icon">
-          <mat-icon>smart_toy</mat-icon>
+          <mat-icon>
+            smart_toy
+          </mat-icon>
         </div>
 
         <span
@@ -16,7 +20,9 @@
         >
           Orquestrador RPA
         </span>
+
       </div>
+
 
       <button
         type="button"
@@ -30,6 +36,7 @@
         matTooltipPosition="right"
         aria-label="Minimizar ou expandir menu"
       >
+
         <mat-icon>
           {{
             sidebarCollapsed()
@@ -37,8 +44,11 @@
               : 'chevron_left'
           }}
         </mat-icon>
+
       </button>
+
     </div>
+
 
     <nav>
 
@@ -52,12 +62,15 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>dashboard</mat-icon>
+        <mat-icon>
+          dashboard
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Dashboard
         </span>
       </a>
+
 
       <a
         routerLink="/robots"
@@ -69,12 +82,15 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>smart_toy</mat-icon>
+        <mat-icon>
+          smart_toy
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Robôs
         </span>
       </a>
+
 
       <a
         routerLink="/parametros"
@@ -86,12 +102,35 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>business</mat-icon>
+        <mat-icon>
+          business
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Empresas
         </span>
       </a>
+
+
+      <a
+        routerLink="/grupos-empresas"
+        routerLinkActive="active"
+        [matTooltip]="
+          sidebarCollapsed()
+            ? 'Grupos de Empresas'
+            : ''
+        "
+        matTooltipPosition="right"
+      >
+        <mat-icon>
+          account_tree
+        </mat-icon>
+
+        <span *ngIf="!sidebarCollapsed()">
+          Grupos de Empresas
+        </span>
+      </a>
+
 
       <a
         routerLink="/acessos"
@@ -104,12 +143,15 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>manage_accounts</mat-icon>
+        <mat-icon>
+          manage_accounts
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Controle de Acessos
         </span>
       </a>
+
 
       <a
         routerLink="/agendamentos"
@@ -121,12 +163,15 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>event_repeat</mat-icon>
+        <mat-icon>
+          event_repeat
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Agendador
         </span>
       </a>
+
 
       <a
         routerLink="/historico"
@@ -138,7 +183,9 @@
         "
         matTooltipPosition="right"
       >
-        <mat-icon>history</mat-icon>
+        <mat-icon>
+          history
+        </mat-icon>
 
         <span *ngIf="!sidebarCollapsed()">
           Histórico de Execuções
@@ -147,7 +194,9 @@
 
     </nav>
 
+
     <div class="sidebar-footer">
+
       <span *ngIf="!sidebarCollapsed()">
         Woelfer
       </span>
@@ -159,11 +208,14 @@
       >
         apartment
       </mat-icon>
+
     </div>
 
   </aside>
 
+
   <main class="content">
     <router-outlet></router-outlet>
   </main>
+
 </div>
