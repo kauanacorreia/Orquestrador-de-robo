@@ -12,6 +12,7 @@ export interface Schedule {
   // formulário amigável na edição. days_of_week nulo = todos os dias.
   time: string | null;
   days_of_week: number[] | null;
+  starts_on: string | null;
   next_execution: string | null;
   status: ScheduleStatus;
 }
@@ -23,6 +24,8 @@ export interface SchedulePayload {
   robot_id: string;
   time: string; // "HH:mm"
   days_of_week: number[]; // 0=domingo ... 6=sabado; vazio = todos os dias
+  starts_on: string; // "YYYY-MM-DD"
+  status?: ScheduleStatus; // enviado só ao editar
 }
 
 export interface RunNowResponse {

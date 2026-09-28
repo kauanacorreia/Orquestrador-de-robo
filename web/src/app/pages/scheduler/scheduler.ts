@@ -16,11 +16,14 @@ import {
 import { forkJoin } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import {
@@ -32,6 +35,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Robot } from '../../core/models/robot.model';
 import { RobotService } from '../../core/services/robot.service';
+import { ProfileService } from '../../core/services/profile.service';
 
 import { CompanyOption } from '../../features/company-robot-config/models/company-robot-config.model';
 import { CompanyRobotConfigService } from '../../features/company-robot-config/services/company-robot-config.service';
@@ -44,6 +48,7 @@ import {
 import { ScheduleService } from '../../features/scheduler/services/schedule.service';
 
 type EditorMode = 'create' | 'edit' | null;
+type RecurrenceType = 'daily' | 'weekdays' | 'weekly' | 'custom';
 
 const WEEKDAYS = [
   { value: 0, label: 'Dom' },
@@ -55,6 +60,16 @@ const WEEKDAYS = [
   { value: 6, label: 'Sáb' }
 ];
 
+const WEEKDAY_SET = new Set([1, 2, 3, 4, 5]);
+
+function toDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 @Component({
   selector: 'app-scheduler',
   standalone: true,
@@ -63,11 +78,14 @@ const WEEKDAYS = [
     ReactiveFormsModule,
 
     MatButtonModule,
+    MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatPaginatorModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSlideToggleModule,
@@ -81,10 +99,12 @@ export class Scheduler implements OnInit {
   private readonly scheduleService = inject(ScheduleService);
   private readonly companyService = inject(CompanyRobotConfigService);
   private readonly robotService = inject(RobotService);
+  private readonly profileService = inject(ProfileService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly fb = inject(FormBuilder);
 
   readonly weekdays = WEEKDAYS;
+  readonly isAdmin = this.profileService.isAdmin;
 
   schedules = signal<Schedule[]>([]);
   companies = signal<CompanyOption[]>([]);
@@ -95,17 +115,22 @@ export class Scheduler implements OnInit {
 
   savingSchedule = signal(false);
   runningId = signal<string | null>(null);
-  togglingId = signal<string | null>(null);
 
   editorMode = signal<EditorMode>(null);
   editingSchedule = signal<Schedule | null>(null);
 
   selectedDays = signal<Set<number>>(new Set());
+  recurrenceType = signal<RecurrenceType>('daily');
+
+  pageIndex = signal(0);
+  pageSize = signal(10);
 
   scheduleForm = this.fb.nonNullable.group({
     company_id: ['', [Validators.required]],
     robot_id: ['', [Validators.required]],
-    time: ['08:00', [Validators.required]]
+    starts_on: [new Date(), [Validators.required]],
+    time: ['08:00', [Validators.required]],
+    status: ['ACTIVE' as Schedule['status']]
   });
 
   sortedSchedules = computed(() =>
@@ -128,8 +153,19 @@ export class Scheduler implements OnInit {
     })
   );
 
+  pagedSchedules = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.sortedSchedules().slice(start, start + this.pageSize());
+  });
+
   ngOnInit(): void {
     this.loadAll();
+    this.profileService.loadIfNeeded();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
   }
 
   private loadAll(): void {
@@ -180,23 +216,34 @@ export class Scheduler implements OnInit {
     this.scheduleForm.reset({
       company_id: '',
       robot_id: '',
-      time: '08:00'
+      starts_on: new Date(),
+      time: '08:00',
+      status: 'ACTIVE'
     });
 
     this.selectedDays.set(new Set());
+    this.recurrenceType.set('daily');
   }
 
   openEdit(schedule: Schedule): void {
     this.editorMode.set('edit');
     this.editingSchedule.set(schedule);
 
+    const startsOn = schedule.starts_on
+      ? new Date(`${schedule.starts_on}T00:00:00`)
+      : new Date();
+
     this.scheduleForm.reset({
       company_id: schedule.company_id,
       robot_id: schedule.robot_id,
-      time: schedule.time ?? '08:00'
+      starts_on: startsOn,
+      time: schedule.time ?? '08:00',
+      status: schedule.status
     });
 
-    this.selectedDays.set(new Set(schedule.days_of_week ?? []));
+    const days = schedule.days_of_week ?? [];
+    this.selectedDays.set(new Set(days));
+    this.recurrenceType.set(this.inferRecurrenceType(days, startsOn));
   }
 
   closeEditor(): void {
@@ -214,6 +261,10 @@ export class Scheduler implements OnInit {
   }
 
   toggleDay(day: number): void {
+    if (this.recurrenceType() !== 'custom') {
+      return;
+    }
+
     const days = new Set(this.selectedDays());
 
     if (days.has(day)) {
@@ -223,6 +274,53 @@ export class Scheduler implements OnInit {
     }
 
     this.selectedDays.set(days);
+  }
+
+  onRecurrenceTypeChange(type: RecurrenceType): void {
+    this.recurrenceType.set(type);
+
+    if (type === 'daily') {
+      this.selectedDays.set(new Set());
+    } else if (type === 'weekdays') {
+      this.selectedDays.set(new Set(WEEKDAY_SET));
+    } else if (type === 'weekly') {
+      this.selectedDays.set(new Set([this.startsOnWeekday()]));
+    }
+  }
+
+  onStartsOnChange(): void {
+    if (this.recurrenceType() === 'weekly') {
+      this.selectedDays.set(new Set([this.startsOnWeekday()]));
+    }
+  }
+
+  private startsOnWeekday(): number {
+    const startsOn = this.scheduleForm.controls.starts_on.value;
+    return startsOn ? startsOn.getDay() : new Date().getDay();
+  }
+
+  private inferRecurrenceType(
+    days: number[],
+    startsOn: Date
+  ): RecurrenceType {
+    if (days.length === 0 || days.length === 7) {
+      return 'daily';
+    }
+
+    const sorted = [...days].sort();
+
+    if (
+      sorted.length === WEEKDAY_SET.size &&
+      sorted.every(day => WEEKDAY_SET.has(day))
+    ) {
+      return 'weekdays';
+    }
+
+    if (sorted.length === 1 && sorted[0] === startsOn.getDay()) {
+      return 'weekly';
+    }
+
+    return 'custom';
   }
 
   saveSchedule(): void {
@@ -237,16 +335,17 @@ export class Scheduler implements OnInit {
     }
 
     const value = this.scheduleForm.getRawValue();
+    const current = this.editingSchedule();
+    const isEdit = this.editorMode() === 'edit' && !!current;
 
     const payload: SchedulePayload = {
       company_id: value.company_id,
       robot_id: value.robot_id,
       time: value.time,
-      days_of_week: Array.from(this.selectedDays()).sort()
+      days_of_week: Array.from(this.selectedDays()).sort(),
+      starts_on: toDateInputValue(value.starts_on),
+      ...(isEdit ? { status: value.status } : {})
     };
-
-    const current = this.editingSchedule();
-    const isEdit = this.editorMode() === 'edit' && !!current;
 
     this.savingSchedule.set(true);
 
@@ -281,32 +380,6 @@ export class Scheduler implements OnInit {
           ),
           'Fechar',
           { duration: 5000 }
-        );
-      }
-    });
-  }
-
-  toggleStatus(schedule: Schedule): void {
-    this.togglingId.set(schedule.id);
-
-    this.scheduleService.toggleStatus(schedule.id).subscribe({
-      next: updated => {
-        this.togglingId.set(null);
-
-        this.schedules.update(schedules =>
-          schedules.map(item =>
-            item.id === updated.id ? updated : item
-          )
-        );
-      },
-
-      error: () => {
-        this.togglingId.set(null);
-
-        this.snackBar.open(
-          'Não foi possível alterar o status do agendamento.',
-          'Fechar',
-          { duration: 4000 }
         );
       }
     });

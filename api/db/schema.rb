@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_142419) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_120001) do
   create_schema "extensions"
 
   # These are extensions that must be enabled in order to support this database
@@ -99,6 +99,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_142419) do
     t.check_constraint "triggered_by::text = ANY (ARRAY['manual'::character varying, 'scheduled'::character varying]::text[])", name: "executions_triggered_by_check"
   end
 
+  create_table "public.notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "execution_id"
+    t.text "kind", null: false
+    t.text "link_path"
+    t.text "message", null: false
+    t.text "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "idx_notifications_created_at"
+    t.check_constraint "kind = ANY (ARRAY['execution_success'::text, 'execution_failed'::text])", name: "notifications_kind_check"
+  end
+
   create_table "public.profiles", id: :uuid, default: nil, force: :cascade do |t|
     t.timestamptz "created_at", default: -> { "now()" }, null: false
     t.text "email"
@@ -150,6 +162,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_142419) do
     t.text "cron_expression", null: false
     t.timestamptz "next_execution"
     t.uuid "robot_id", null: false
+    t.date "starts_on"
     t.text "status", default: "ACTIVE", null: false
     t.timestamptz "updated_at", default: -> { "now()" }, null: false
     t.index ["company_id"], name: "idx_schedules_company"
@@ -165,6 +178,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_142419) do
   add_foreign_key "public.executions", "public.companies", name: "executions_company_id_fkey", on_delete: :cascade
   add_foreign_key "public.executions", "public.robots", name: "executions_robot_id_fkey", on_delete: :cascade
   add_foreign_key "public.executions", "public.schedules", name: "executions_schedule_id_fkey", on_delete: :nullify
+  add_foreign_key "public.notifications", "public.executions", name: "notifications_execution_id_fkey", on_delete: :nullify
   add_foreign_key "public.profiles", "auth.users", column: "id", name: "profiles_id_fkey", on_delete: :cascade
   add_foreign_key "public.robot_edit_logs", "public.robots"
   add_foreign_key "public.robot_versions", "public.robots", name: "robot_versions_robot_id_fkey", on_delete: :cascade

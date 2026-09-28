@@ -33,32 +33,31 @@
       <table class="schedules-table">
         <thead>
           <tr>
-            <th>Empresa</th>
+            <th class="status-column">Status</th>
             <th>Robô</th>
+            <th>Empresa</th>
             <th>Recorrência</th>
             <th class="next-run-column">Próxima Execução</th>
-            <th class="status-column">Status</th>
             <th class="actions-column">Ações</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let schedule of sortedSchedules()">
-            <td class="company-name">{{ schedule.company_name }}</td>
-            <td>{{ schedule.robot_name }}</td>
-            <td>{{ schedule.cron_description }}</td>
-            <td>{{ formatNextExecution(schedule.next_execution) }}</td>
-
+          <tr *ngFor="let schedule of pagedSchedules()">
             <td class="status-column">
-              <mat-slide-toggle
-                [checked]="schedule.status === 'ACTIVE'"
-                [disabled]="togglingId() === schedule.id"
+              <span
+                class="status-dot"
+                [class.active]="schedule.status === 'ACTIVE'"
+                [class.paused]="schedule.status === 'PAUSED'"
                 [matTooltip]="statusLabel(schedule.status)"
-                (change)="toggleStatus(schedule)"
               >
                 {{ statusLabel(schedule.status) }}
-              </mat-slide-toggle>
+              </span>
             </td>
+            <td>{{ schedule.robot_name }}</td>
+            <td class="company-name">{{ schedule.company_name }}</td>
+            <td>{{ schedule.cron_description }}</td>
+            <td>{{ formatNextExecution(schedule.next_execution) }}</td>
 
             <td class="actions-column">
               <button
@@ -71,6 +70,7 @@
               </button>
 
               <button
+                *ngIf="isAdmin()"
                 mat-icon-button
                 type="button"
                 matTooltip="Executar Agora"
@@ -83,6 +83,15 @@
           </tr>
         </tbody>
       </table>
+
+      <mat-paginator
+        [length]="sortedSchedules().length"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 25, 50]"
+        [pageIndex]="pageIndex()"
+        (page)="onPageChange($event)"
+      >
+      </mat-paginator>
     </div>
 
     <div class="empty-list" *ngIf="sortedSchedules().length === 0">
@@ -128,11 +137,21 @@
           </mat-select>
         </mat-form-field>
 
-        <div class="weekdays-field">
-          <span class="weekdays-label">Dias da semana</span>
-          <span class="weekdays-hint">Nenhum dia marcado = todos os dias</span>
+        <div class="recurrence-field">
+          <span class="weekdays-label">Recorrência</span>
 
-          <div class="weekdays-options">
+          <mat-button-toggle-group
+            class="recurrence-toggle-group"
+            [value]="recurrenceType()"
+            (change)="onRecurrenceTypeChange($event.value)"
+          >
+            <mat-button-toggle value="daily">Diariamente</mat-button-toggle>
+            <mat-button-toggle value="weekdays">Dias úteis</mat-button-toggle>
+            <mat-button-toggle value="weekly">Semanalmente</mat-button-toggle>
+            <mat-button-toggle value="custom">Personalizado</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          <div class="weekdays-options" *ngIf="recurrenceType() === 'custom'">
             <mat-checkbox
               *ngFor="let day of weekdays"
               [checked]="isDaySelected(day.value)"
@@ -144,9 +163,32 @@
         </div>
 
         <mat-form-field appearance="outline">
+          <mat-label>Data de início</mat-label>
+          <input
+            matInput
+            [matDatepicker]="startsOnPicker"
+            formControlName="starts_on"
+            (dateChange)="onStartsOnChange()"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="startsOnPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startsOnPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Horário</mat-label>
           <input matInput type="time" formControlName="time" />
         </mat-form-field>
+
+        <div class="status-field" *ngIf="editorMode() === 'edit'">
+          <span class="weekdays-label">Status</span>
+
+          <mat-slide-toggle
+            [checked]="scheduleForm.controls.status.value === 'ACTIVE'"
+            (change)="scheduleForm.controls.status.setValue($event.checked ? 'ACTIVE' : 'PAUSED')"
+          >
+            {{ scheduleForm.controls.status.value === 'ACTIVE' ? 'Ativo' : 'Pausado' }}
+          </mat-slide-toggle>
+        </div>
       </form>
     </div>
 

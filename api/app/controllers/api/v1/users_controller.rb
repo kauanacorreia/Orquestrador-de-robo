@@ -2,7 +2,7 @@ module Api
   module V1
     class UsersController < ApplicationController
       before_action :authenticate_supabase_user!
-      before_action :require_admin!, except: [:record_login]
+      before_action :require_admin!, except: [:record_login, :me]
 
       def index
         profiles =
@@ -342,6 +342,11 @@ module Api
               .reload
               .last_login_at
         }
+      end
+
+      def me
+        render json:
+          profile_json(current_profile)
       end
 
       private

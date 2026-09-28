@@ -1,5 +1,8 @@
 module Api
   class SchedulesController < ApplicationController
+    before_action :authenticate_supabase_user!, only: [:run_now]
+    before_action :require_admin!, only: [:run_now]
+
     def index
       schedules = Schedule.includes(:company, :robot).order(created_at: :desc)
 
@@ -62,7 +65,7 @@ module Api
     # amigavel days_of_week[] + time ("HH:MM") vindo do formulario da tela,
     # que é convertido para cron_expression aqui.
     def schedule_attributes
-      permitted = params.permit(:company_id, :robot_id, :cron_expression, :time, days_of_week: [])
+      permitted = params.permit(:company_id, :robot_id, :cron_expression, :time, :status, :starts_on, days_of_week: [])
 
       if permitted[:cron_expression].blank? && permitted[:time].present?
         hour, minute = permitted[:time].split(":").map(&:to_i)
@@ -96,6 +99,7 @@ module Api
         # formulário amigável ao editar, sem duplicar o parser no frontend.
         time: parsed && format("%02d:%02d", parsed[:hour], parsed[:minute]),
         days_of_week: parsed&.fetch(:days_of_week),
+        starts_on: schedule.starts_on,
         next_execution: schedule.next_execution,
         status: schedule.status
       }

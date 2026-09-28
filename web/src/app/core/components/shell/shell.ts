@@ -10,6 +10,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { NotificationBell } from '../../../features/notifications/components/notification-bell/notification-bell';
+
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -19,7 +21,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     RouterLink,
     RouterLinkActive,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    NotificationBell
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss'

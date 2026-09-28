@@ -59,6 +59,9 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :notifications,
+              only: [:index]
+
     namespace :v1 do
       resources :companies,
                 only: [
@@ -97,6 +100,7 @@ Rails.application.routes.draw do
 
         collection do
           post :record_login
+          get :me
         end
 
         member do

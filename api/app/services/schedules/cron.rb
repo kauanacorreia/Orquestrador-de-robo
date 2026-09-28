@@ -11,6 +11,8 @@ module Schedules
   # ja existem agendamentos no banco cadastrados assim.
   module Cron
     DAY_NAMES = %w[domingo segunda terça quarta quinta sexta sábado].freeze
+    DAY_ABBR = %w[Dom Seg Ter Qua Qui Sex Sáb].freeze
+    WEEKDAYS = [1, 2, 3, 4, 5].freeze
 
     DAY_TOKEN = /[0-6](-[0-6])?/
     FORMAT = /\A([0-5]?\d) ([01]?\d|2[0-3]) \* \* (\*|#{DAY_TOKEN}(,#{DAY_TOKEN})*)\z/
@@ -44,14 +46,14 @@ module Schedules
     def describe(cron_expression)
       parsed = parse(cron_expression)
       time = format("%02d:%02d", parsed[:hour], parsed[:minute])
+      days = parsed[:days_of_week]
 
-      if parsed[:days_of_week].nil? || parsed[:days_of_week].length == 7
+      if days.nil? || days.length == 7
         "Todos os dias às #{time}"
-      elsif parsed[:days_of_week].length == 1
-        "Toda #{DAY_NAMES[parsed[:days_of_week].first]} às #{time}"
+      elsif days.sort == WEEKDAYS
+        "Dias úteis às #{time}"
       else
-        names = parsed[:days_of_week].map { |d| DAY_NAMES[d] }
-        "Toda #{names[0..-2].join(', ')} e #{names.last} às #{time}"
+        "#{days.map { |d| DAY_ABBR[d] }.join(', ')} às #{time}"
       end
     end
 

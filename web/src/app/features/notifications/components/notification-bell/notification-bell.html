@@ -1,0 +1,42 @@
+<button
+  mat-icon-button
+  type="button"
+  matTooltip="Notificações"
+  [matMenuTriggerFor]="notificationsMenu"
+  (menuOpened)="onMenuOpened()"
+>
+  <mat-icon [matBadge]="unreadCount() || null" matBadgeColor="warn" matBadgeSize="small">
+    notifications
+  </mat-icon>
+</button>
+
+<mat-menu #notificationsMenu="matMenu" class="notification-menu-panel">
+  <div class="notification-menu-content" (click)="$event.stopPropagation()">
+    <header class="notification-menu-header">Notificações</header>
+
+    @if (notifications().length === 0) {
+      <div class="notification-empty">Nenhuma notificação por enquanto.</div>
+    } @else {
+      <ul class="notification-list">
+        @for (notification of notifications(); track notification.id) {
+          <li>
+            <button
+              type="button"
+              class="notification-item"
+              [class.failed]="notification.kind === 'execution_failed'"
+              (click)="openNotification(notification)"
+            >
+              <mat-icon>{{ iconFor(notification) }}</mat-icon>
+
+              <div class="notification-item-text">
+                <strong>{{ notification.title }}</strong>
+                <span>{{ notification.message }}</span>
+                <time>{{ formatDate(notification.created_at) }}</time>
+              </div>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</mat-menu>

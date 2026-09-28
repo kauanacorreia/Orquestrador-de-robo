@@ -1,8 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, from, switchMap, throwError } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+
+import { AuthService } from '../../../core/services/auth.service';
 
 import {
   RunNowResponse,
@@ -15,6 +17,7 @@ import {
 })
 export class ScheduleService {
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private readonly baseUrl = `${environment.apiUrl}/schedules`;
 
   list(): Observable<Schedule[]> {
@@ -43,9 +46,18 @@ export class ScheduleService {
   }
 
   runNow(id: string): Observable<RunNowResponse> {
-    return this.http.post<RunNowResponse>(
-      `${this.baseUrl}/${id}/run_now`,
-      {}
+    return from(this.authService.getAccessToken()).pipe(
+      switchMap(token => {
+        if (!token) {
+          return throwError(() => new Error('Usuário não autenticado.'));
+        }
+
+        return this.http.post<RunNowResponse>(
+          `${this.baseUrl}/${id}/run_now`,
+          {},
+          { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
+        );
+      })
     );
   }
 }
