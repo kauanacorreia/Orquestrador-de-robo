@@ -19,13 +19,44 @@
   }
 }
 
-// Conteúdo projetado dentro do popup do calendário (mat-datepicker-actions).
 .dashboard-filters__quick-presets {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 6px;
+  margin-top: 16px;
+}
+
+.dashboard-filters__quick-preset {
+  width: 100% !important;
+  justify-content: center;
+  text-align: center;
 }
 
 .dashboard-filters__spacer {
   flex: 1;
+}
+
+.dashboard-filters__action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+// O popup do mat-date-range-picker empilha o calendário e as ações
+// (mat-datepicker-actions) em coluna por padrão. Como só este calendário usa
+// ações, é seguro sobrescrever globalmente para colocar os atalhos de
+// período ao lado do calendário, em uma coluna vertical.
+::ng-deep .mat-datepicker-content-container-with-actions {
+  flex-direction: row !important;
+  align-items: stretch !important;
+}
+
+::ng-deep .mat-datepicker-actions {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 8px;
+  padding: 12px 16px 16px 16px;
+  border-left: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12));
 }

@@ -5,7 +5,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { ActivityTable } from '../../features/dashboard/components/activity-table/activity-table';
 import { DashboardFiltersPanel } from '../../features/dashboard/components/dashboard-filters/dashboard-filters';
-import { KpiCard } from '../../features/dashboard/components/kpi-card/kpi-card';
+import { DashboardKpis } from '../../features/dashboard/components/dashboard-kpis/dashboard-kpis';
 import { VolumetriaChart } from '../../features/dashboard/components/volumetria-chart/volumetria-chart';
 import { DashboardStore } from '../../features/dashboard/services/dashboard-store.service';
 import { DashboardFilters } from '../../features/dashboard/models/dashboard.model';
@@ -14,7 +14,7 @@ export const ACTIVITY_LIMIT_OPTIONS = [10, 25, 50] as const;
 
 @Component({
   selector: 'app-home',
-  imports: [KpiCard, VolumetriaChart, ActivityTable, DashboardFiltersPanel, FormsModule, MatFormFieldModule, MatSelectModule],
+  imports: [DashboardKpis, VolumetriaChart, ActivityTable, DashboardFiltersPanel, FormsModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -54,9 +54,5 @@ export class Home implements OnInit, OnDestroy {
 
   setActivityLimit(limit: number): void {
     this.activityLimit.set(limit);
-  }
-
-  formatPercent(rate: number): string {
-    return `${(rate * 100).toFixed(1)}%`;
   }
 }

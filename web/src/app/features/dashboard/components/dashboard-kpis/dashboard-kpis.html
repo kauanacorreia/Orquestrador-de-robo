@@ -1,0 +1,67 @@
+<div class="dashboard-kpis">
+  <app-kpi-card
+    label="Execuções realizadas"
+    [value]="summary().totalExecutions"
+    tooltip="Quantidade total de execuções de robôs no período e filtros selecionados."
+  ></app-kpi-card>
+
+  <app-kpi-card
+    label="Clientes processados"
+    [value]="summary().clients"
+    tooltip="Total de empresas (clientes) cadastradas no Orquestrador (não depende do período/filtro)."
+  ></app-kpi-card>
+
+  <app-kpi-card
+    label="Robôs ativos"
+    [value]="summary().activeRobots"
+    tooltip="Robôs com status Ativo cadastrados no Orquestrador (não depende do período/filtro)."
+  ></app-kpi-card>
+
+  <app-kpi-card
+    label="Usuários ativos"
+    [value]="summary().activeUsers"
+    tooltip="Usuários com login registrado nas últimas 24 horas (não depende do período/filtro)."
+  ></app-kpi-card>
+
+  <app-kpi-card
+    label="Automações com falhas"
+    [value]="summary().failuresLast24h"
+    unitLabel="finalizadas com falha"
+    rateLabel="Taxa de falhas (24h)"
+    [secondaryValue]="formatPercent(summary().failuresLast24hRate)"
+    tooltip="Falhas ocorridas nas últimas 24 horas, independente do período selecionado no filtro."
+  ></app-kpi-card>
+
+  <app-kpi-card
+    label="Automações com sucesso"
+    [value]="summary().successCount"
+    unitLabel="finalizadas com êxito"
+    rateLabel="Taxa de sucesso Global"
+    rateIcon="check_circle"
+    [showDivider]="true"
+    [secondaryValue]="formatPercent(summary().successRate)"
+    variant="success"
+    tooltip="Execuções finalizadas com sucesso no período e filtros selecionados."
+  ></app-kpi-card>
+
+  @if (summary().criticalRobot; as criticalRobot) {
+    <app-kpi-card
+      label="Robô mais crítico"
+      [value]="criticalRobot.robotName ?? 'Robô removido'"
+      [rows]="[
+        { label: 'Total de execuções', value: criticalRobot.totalExecutions },
+        { label: 'Total de erros', value: criticalRobot.errors },
+        { label: 'Taxa de erro', value: formatPercent(criticalRobot.errorRate) }
+      ]"
+      variant="critical"
+      tooltip="Robô com mais execuções com falha no período e filtros selecionados (nome, total de execuções, erros e taxa de erro)."
+    ></app-kpi-card>
+  } @else {
+    <app-kpi-card
+      label="Robô mais crítico"
+      value="—"
+      unitLabel="Nenhuma falha no período"
+      tooltip="Robô com mais execuções com falha no período e filtros selecionados. Nenhuma falha registrada neste recorte."
+    ></app-kpi-card>
+  }
+</div>

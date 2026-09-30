@@ -3,7 +3,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-export type KpiCardVariant = 'default' | 'success' | 'danger';
+export type KpiCardVariant = 'default' | 'success' | 'danger' | 'critical';
+
+export interface KpiCardRow {
+  label: string;
+  value: string | number;
+}
 
 @Component({
   selector: 'app-kpi-card',
@@ -24,6 +29,17 @@ export class KpiCard {
   // sempre vem primeiro, a taxa sempre embaixo.
   readonly rateLabel = input<string | undefined>(undefined);
   readonly secondaryValue = input<string | number | null | undefined>(undefined);
+
+  // Ícone (nome do Material Icon) exibido antes do rateLabel, ex: "check_circle"
+  // na taxa de sucesso global.
+  readonly rateIcon = input<string | undefined>(undefined);
+
+  // Linha divisória acima da seção de taxa (usado no card de "Automações com sucesso").
+  readonly showDivider = input<boolean>(false);
+
+  // Lista de linhas label/valor exibida no lugar de unitLabel + taxa, para
+  // cards com múltiplos indicadores (ex: "Robô mais crítico").
+  readonly rows = input<KpiCardRow[] | undefined>(undefined);
 
   readonly subtitle = input<string | undefined>(undefined);
   readonly variant = input<KpiCardVariant>('default');

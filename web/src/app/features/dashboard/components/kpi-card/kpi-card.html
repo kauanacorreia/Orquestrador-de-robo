@@ -26,10 +26,30 @@
       <span class="kpi-card__unit">{{ unitLabel() }}</span>
     }
 
+    @if (rows(); as rows) {
+      <div class="kpi-card__rows">
+        @for (row of rows; track row.label) {
+          <div class="kpi-card__row">
+            <span class="kpi-card__row-label">{{ row.label }}</span>
+            <span class="kpi-card__row-value">{{ row.value }}</span>
+          </div>
+        }
+      </div>
+    }
+
     @if (secondaryValue() !== null && secondaryValue() !== undefined) {
+      @if (showDivider()) {
+        <hr class="kpi-card__divider" />
+      }
+
       <div class="kpi-card__rate">
         @if (rateLabel()) {
-          <span class="kpi-card__rate-label">{{ rateLabel() }}</span>
+          <span class="kpi-card__rate-label">
+            @if (rateIcon()) {
+              <mat-icon class="kpi-card__rate-icon">{{ rateIcon() }}</mat-icon>
+            }
+            {{ rateLabel() }}
+          </span>
         }
 
         <span class="kpi-card__value kpi-card__value--muted">{{ secondaryValue() }}</span>

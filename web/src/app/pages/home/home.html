@@ -11,62 +11,7 @@
   ></app-dashboard-filters>
 
   @if (summary(); as summary) {
-    <div class="dashboard-home__kpis">
-      <app-kpi-card
-        label="Total de execuções"
-        [value]="summary.totalExecutions"
-        tooltip="Quantidade total de execuções de robôs no período e filtros selecionados."
-      ></app-kpi-card>
-
-      <app-kpi-card
-        label="Falhas (últimas 24h)"
-        [value]="summary.failuresLast24h"
-        unitLabel="finalizadas com falha"
-        rateLabel="Taxa de falhas (24h)"
-        [secondaryValue]="formatPercent(summary.failuresLast24hRate)"
-        variant="danger"
-        [attention]="true"
-        tooltip="Falhas ocorridas nas últimas 24 horas, independente do período selecionado no filtro."
-      ></app-kpi-card>
-
-      @if (summary.criticalRobot; as criticalRobot) {
-        <app-kpi-card
-          label="Robô mais crítico"
-          [value]="criticalRobot.robotName ?? 'Robô removido'"
-          [unitLabel]="criticalRobot.totalExecutions + ' execuções · ' + criticalRobot.errors + ' erros'"
-          rateLabel="Taxa de erro"
-          [secondaryValue]="formatPercent(criticalRobot.errorRate)"
-          variant="danger"
-          [attention]="true"
-          tooltip="Robô com mais execuções com falha no período e filtros selecionados (nome, total de execuções, erros e taxa de erro)."
-        ></app-kpi-card>
-      } @else {
-        <app-kpi-card
-          label="Robô mais crítico"
-          value="—"
-          unitLabel="Nenhuma falha no período"
-          tooltip="Robô com mais execuções com falha no período e filtros selecionados. Nenhuma falha registrada neste recorte."
-        ></app-kpi-card>
-      }
-
-      <app-kpi-card
-        label="Robôs ativos"
-        [value]="summary.activeRobots"
-        tooltip="Robôs com status Ativo cadastrados no Orquestrador (não depende do período/filtro)."
-      ></app-kpi-card>
-
-      <app-kpi-card
-        label="Usuários"
-        [value]="summary.activeUsers"
-        tooltip="Usuários com login registrado nas últimas 24 horas (não depende do período/filtro)."
-      ></app-kpi-card>
-
-      <app-kpi-card
-        label="Clientes"
-        [value]="summary.clients"
-        tooltip="Total de empresas (clientes) cadastradas no Orquestrador (não depende do período/filtro)."
-      ></app-kpi-card>
-    </div>
+    <app-dashboard-kpis [summary]="summary"></app-dashboard-kpis>
   } @else if (loading()) {
     <p class="dashboard-home__loading">Carregando dashboard...</p>
   } @else if (error(); as error) {

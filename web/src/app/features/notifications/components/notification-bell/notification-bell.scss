@@ -1,3 +1,10 @@
+// O painel do mat-menu tem max-width:280px por padrão, menor que o
+// conteúdo (320px), o que forçava scroll horizontal em vez de o painel
+// acompanhar a largura do conteúdo.
+::ng-deep .notification-menu-panel {
+  max-width: 320px !important;
+}
+
 .notification-menu-content {
   width: 320px;
   max-height: 380px;

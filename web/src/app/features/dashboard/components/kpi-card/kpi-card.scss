@@ -1,8 +1,8 @@
 .kpi-card {
   height: 100%;
 
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.35);
+  border-radius: 16px;
   box-shadow: none;
 
   display: flex;
@@ -90,8 +90,52 @@
   }
 
   &__rate-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
     font-size: 0.75rem;
     color: rgba(0, 0, 0, 0.5);
+  }
+
+  &__rate-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    line-height: 14px;
+    color: #2e7d32;
+  }
+
+  &__divider {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    margin: 8px 0 0;
+  }
+
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    margin-top: auto;
+    padding-top: 8px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+
+    font-size: 0.8rem;
+  }
+
+  &__row-label {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__row-value {
+    font-weight: 600;
   }
 
   &__subtitle {
@@ -114,5 +158,20 @@
 
   &--attention.kpi-card--success {
     border-color: rgba(46, 125, 50, 0.35);
+  }
+
+  // Card de destaque (ex: "Robô mais crítico"): preenchimento rosado, não só borda.
+  &--critical {
+    background-color: #fdeaea;
+    border-color: rgba(198, 40, 40, 0.4);
+  }
+
+  &--critical &__value,
+  &--critical &__row-value {
+    color: #c62828;
+  }
+
+  &--critical &__row-label {
+    color: rgba(198, 40, 40, 0.75);
   }
 }
